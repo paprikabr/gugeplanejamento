@@ -781,26 +781,69 @@ tbody tr:hover td { background: #FAFAF8; }
 <div class="notify" id="notify"></div>
 
 <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs, deleteDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyCOgKKaZ0DNUe5W5LuGrj0oWPfng8ZfSJA",
-    authDomain: "planejamentoguge.firebaseapp.com",
-    projectId: "planejamentoguge",
-    storageBucket: "planejamentoguge.firebasestorage.app",
-    messagingSenderId: "669833914358",
-    appId: "1:669833914358:web:bf8c1e3a0cb32e4b99c9d7"
-  };
+const firebaseConfig = {
+  apiKey: "AIzaSyCOgKKaZ0DNUe5W5LuGrj0oWPfng8ZfSJA",
+  authDomain: "planejamentoguge.firebaseapp.com",
+  projectId: "planejamentoguge",
+  storageBucket: "planejamentoguge.firebasestorage.app",
+  messagingSenderId: "669833914358",
+  appId: "1:669833914358:web:bf8c1e3a0cb32e4b99c9d7"
+};
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-</script>
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-<script>
+// ══════════════════════════════════════════
+// FIREBASE HELPERS
+// ══════════════════════════════════════════
+async function fbSaveProdutos() {
+  await setDoc(doc(db,'guge','produtos'), { lista: DB.produtos, nextId: DB.nextId });
+}
+async function fbSaveMes(k) {
+  await setDoc(doc(db,'meses',k), DB.meses[k] || {itens:[]});
+}
+async function fbSaveMeta(k) {
+  await setDoc(doc(db,'metas',k), DB.metas[k] || {});
+}
+async function fbSaveCronograma(ano) {
+  await setDoc(doc(db,'cronograma',String(ano)), DB.cronograma[ano] || {});
+}
+async function fbLoad() {
+  try {
+    // produtos
+    const pDoc = await getDoc(doc(db,'guge','produtos'));
+    if(pDoc.exists()) {
+      DB.produtos = pDoc.data().lista || DB.produtos;
+      DB.nextId = pDoc.data().nextId || DB.nextId;
+    } else {
+      // primeira vez: salva os produtos padrão
+      await fbSaveProdutos();
+    }
+    // meses
+    const mSnap = await getDocs(collection(db,'meses'));
+    mSnap.forEach(d => { DB.meses[d.id] = d.data(); });
+    // metas
+    const mtSnap = await getDocs(collection(db,'metas'));
+    mtSnap.forEach(d => { DB.metas[d.id] = d.data(); });
+    // cronograma
+    const cSnap = await getDocs(collection(db,'cronograma'));
+    cSnap.forEach(d => { DB.cronograma[d.id] = d.data(); });
+  } catch(e) {
+    console.error('Erro Firebase:', e);
+    notify('Erro ao carregar dados. Verifique a conexão.','warn');
+  }
+}
+
+// saveDB agora é um alias que salva tudo relevante
+// funções individuais são chamadas pontualmente
+function saveDB() {
+  // fallback localStorage
+  try { localStorage.setItem('gugeDB_bk', JSON.stringify(DB)); } catch(e){}
+}
+
 // ══════════════════════════════════════════
 // DATA STORE
 // ══════════════════════════════════════════
@@ -809,7 +852,6 @@ const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho
 
 let DB = {
   produtos: [
-    // PRÉ-POPULADOS DA PLANILHA
     {id:1,ref:'001',nome:'Calça Jeans Feminina',genero:'Feminino',categoria:'Jeans',precoMin:104.90,precoMax:109.90,status:'ativo'},
     {id:2,ref:'002',nome:'Calça Jeans Masculina',genero:'Masculino',categoria:'Jeans',precoMin:88.90,precoMax:109.90,status:'ativo'},
     {id:3,ref:'003',nome:'Bermuda Jeans',genero:'Masculino',categoria:'Jeans',precoMin:79.90,precoMax:88.90,status:'ativo'},
@@ -834,15 +876,6 @@ let DB = {
   cronograma: {},
   nextId: 19
 };
-
-function saveDB() { try { localStorage.setItem('gugeDB', JSON.stringify(DB)); } catch(e){} }
-function loadDB() {
-  try {
-    const s = localStorage.getItem('gugeDB');
-    if(s) DB = JSON.parse(s);
-  } catch(e){}
-}
-loadDB();
 
 function chave(ano, mes) { return ano + '-' + String(mes).padStart(2,'0'); }
 
@@ -1182,7 +1215,7 @@ function syncGrade() {
   calcAddTotal();
 }
 
-function adicionarItemMes() {
+async function adicionarItemMes() {
   if(!mesSelecionado) return;
   const prodId = parseInt(document.getElementById('add-produto').value);
   if(!prodId) { notify('Selecione um produto','warn'); return; }
@@ -1198,30 +1231,38 @@ function adicionarItemMes() {
   if(!DB.meses[k]) DB.meses[k] = {itens:[]};
   DB.meses[k].itens.push({produtoId:prodId, preco, grade, qtdTotal, total});
   saveDB();
+  notify('Salvando...','');
+  await fbSaveMes(k);
   renderMensalContent(mesSelecionado.ano, mesSelecionado.mes);
   renderMeses();
   notify('Produto adicionado!','success');
 }
 
-function removerItemMes(idx) {
+async function removerItemMes(idx) {
   if(!mesSelecionado) return;
   const k = chave(mesSelecionado.ano, mesSelecionado.mes);
   DB.meses[k].itens.splice(idx,1);
   saveDB();
+  await fbSaveMes(k);
   renderMensalContent(mesSelecionado.ano, mesSelecionado.mes);
   renderMeses();
 }
 
-function salvarMes() {
+async function salvarMes() {
+  if(!mesSelecionado) return;
+  const k = chave(mesSelecionado.ano, mesSelecionado.mes);
   saveDB();
+  notify('Salvando...','');
+  await fbSaveMes(k);
   notify('Mês salvo com sucesso!','success');
   renderMeses();
 }
 
-function limparMes(k) {
+async function limparMes(k) {
   if(!confirm('Limpar todos os produtos deste mês?')) return;
   DB.meses[k] = {itens:[]};
   saveDB();
+  await fbSaveMes(k);
   renderMensalContent(mesSelecionado.ano, mesSelecionado.mes);
   renderMeses();
 }
@@ -1286,15 +1327,16 @@ function openModalProduto(id=null) {
 
 function editarProduto(id) { openModalProduto(id); }
 
-function excluirProduto(id) {
+async function excluirProduto(id) {
   if(!confirm('Excluir produto?')) return;
   DB.produtos = DB.produtos.filter(p=>p.id!==id);
   saveDB();
+  await fbSaveProdutos();
   renderCatalogo();
   notify('Produto excluído','success');
 }
 
-function salvarProduto() {
+async function salvarProduto() {
   const nome = document.getElementById('prod-nome').value.trim();
   if(!nome) { notify('Informe o nome','warn'); return; }
   const obj = {
@@ -1313,6 +1355,8 @@ function salvarProduto() {
     DB.produtos.push({...obj, id: DB.nextId++});
   }
   saveDB();
+  notify('Salvando...','');
+  await fbSaveProdutos();
   closeModal('modal-produto');
   renderCatalogo();
   notify(editProdId?'Produto atualizado!':'Produto cadastrado!','success');
@@ -1325,7 +1369,7 @@ function openModalMeta() {
   document.getElementById('modal-meta').classList.add('open');
 }
 
-function salvarMeta() {
+async function salvarMeta() {
   const ano = document.getElementById('meta-ano').value;
   const mes = document.getElementById('meta-mes').value;
   const k = chave(ano, mes);
@@ -1334,6 +1378,8 @@ function salvarMeta() {
     pecas: parseInt(document.getElementById('meta-pecas').value)||0
   };
   saveDB();
+  notify('Salvando...','');
+  await fbSaveMeta(k);
   closeModal('modal-meta');
   notify('Meta salva!','success');
   if(mesSelecionado) renderMensalContent(mesSelecionado.ano, mesSelecionado.mes);
@@ -1494,8 +1540,11 @@ function toggleCron(ano, prodId, mes, el) {
   else { arr.push(mes); el.classList.add('on'); el.textContent='✓'; }
 }
 
-function salvarCronograma() {
+async function salvarCronograma() {
+  const ano = document.getElementById('sel-cron-ano')?.value || '2025';
   saveDB();
+  notify('Salvando...','');
+  await fbSaveCronograma(ano);
   notify('Cronograma salvo!','success');
 }
 
@@ -1531,9 +1580,62 @@ function exportarDados() {
   notify('Exportado com sucesso!','success');
 }
 
-// INIT
-renderDashboard();
-renderCatalogo();
+// ══════════════════════════════════════════
+// INIT — carrega Firebase depois renderiza
+// ══════════════════════════════════════════
+async function init() {
+  // Mostra loading
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="loading-screen" style="position:fixed;inset:0;background:#EDEAE3;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px">
+      <div style="font-family:'DM Sans',sans-serif;font-size:26px;font-weight:700;letter-spacing:8px;color:#1B3A6B">GUGE</div>
+      <div style="font-size:12px;color:#8A97AE;letter-spacing:2px;text-transform:uppercase">Carregando dados...</div>
+      <div style="width:180px;height:3px;background:#D4D0C8;border-radius:99px;overflow:hidden">
+        <div id="load-bar" style="width:0%;height:100%;background:#1B3A6B;border-radius:99px;transition:width 1.5s ease"></div>
+      </div>
+    </div>
+  `);
+  setTimeout(() => { const b = document.getElementById('load-bar'); if(b) b.style.width='85%'; }, 100);
+
+  await fbLoad();
+
+  // Remove loading
+  const ls = document.getElementById('loading-screen');
+  if(ls) { ls.style.opacity='0'; ls.style.transition='opacity 0.3s'; setTimeout(()=>ls.remove(),300); }
+
+  renderDashboard();
+  renderCatalogo();
+}
+
+// expõe funções ao escopo global (necessário pois onclick= precisa acessar)
+window.goPage = goPage;
+window.selecionarMes = selecionarMes;
+window.renderMeses = renderMeses;
+window.adicionarItemMes = adicionarItemMes;
+window.removerItemMes = removerItemMes;
+window.salvarMes = salvarMes;
+window.limparMes = limparMes;
+window.preencherPreco = preencherPreco;
+window.calcAddTotal = calcAddTotal;
+window.distGradeAdd = distGradeAdd;
+window.syncGrade = syncGrade;
+window.openModalProduto = openModalProduto;
+window.editarProduto = editarProduto;
+window.excluirProduto = excluirProduto;
+window.salvarProduto = salvarProduto;
+window.renderCatalogo = renderCatalogo;
+window.openModalMeta = openModalMeta;
+window.salvarMeta = salvarMeta;
+window.renderHistorico = renderHistorico;
+window.irParaMes = irParaMes;
+window.renderAnual = renderAnual;
+window.switchAnualTab = switchAnualTab;
+window.renderCronograma = renderCronograma;
+window.toggleCron = toggleCron;
+window.salvarCronograma = salvarCronograma;
+window.closeModal = closeModal;
+window.exportarDados = exportarDados;
+
+init();
 </script>
 </body>
 </html>
