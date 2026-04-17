@@ -526,7 +526,7 @@ tbody tr:hover td { background: #FAFAF8; }
         <div class="metric-card">
           <div class="metric-label">Meses com Dados</div>
           <div class="metric-value" id="db-meses">0</div>
-          <div class="metric-sub" id="db-ano-label">em 2025</div>
+          <div class="metric-sub" id="db-ano-label">em 2026</div>
         </div>
       </div>
 
@@ -535,7 +535,7 @@ tbody tr:hover td { background: #FAFAF8; }
           <div class="card-header">
             <div>
               <div class="card-title">Faturamento por Mês</div>
-              <div class="card-sub" id="db-ano-chart">2025</div>
+              <div class="card-sub" id="db-ano-chart">2026</div>
             </div>
           </div>
           <div id="chart-bars" style="display:flex;align-items:flex-end;gap:6px;height:100px;padding-top:8px"></div>
@@ -568,7 +568,7 @@ tbody tr:hover td { background: #FAFAF8; }
         <div>
           <label class="form-label">Ano</label>
           <select id="sel-ano" class="select-year" onchange="renderMeses()">
-            <option>2024</option><option selected>2025</option><option>2026</option>
+            <option>2024</option><option>2025</option><option selected>2026</option>
           </select>
         </div>
         <div style="flex:1">
@@ -622,7 +622,7 @@ tbody tr:hover td { background: #FAFAF8; }
     <div id="page-historico" class="page">
       <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
         <select id="filtro-hist-ano" onchange="renderHistorico()" style="max-width:120px">
-          <option>2024</option><option selected>2025</option><option>2026</option>
+          <option>2024</option><option>2025</option><option selected>2026</option>
         </select>
         <span style="font-size:13px;color:var(--text3)" id="hist-resumo"></span>
       </div>
@@ -636,7 +636,7 @@ tbody tr:hover td { background: #FAFAF8; }
     <div id="page-anual" class="page">
       <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
         <select id="sel-anual-ano" onchange="renderAnual()" style="max-width:120px">
-          <option>2024</option><option selected>2025</option><option>2026</option>
+          <option>2024</option><option>2025</option><option selected>2026</option>
         </select>
         <div class="tabs" style="margin-bottom:0">
           <button class="tab-btn active" onclick="switchAnualTab('financeiro',this)">Financeiro</button>
@@ -655,7 +655,7 @@ tbody tr:hover td { background: #FAFAF8; }
     <div id="page-cronograma" class="page">
       <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center">
         <select id="sel-cron-ano" onchange="renderCronograma()" style="max-width:120px">
-          <option>2024</option><option selected>2025</option><option>2026</option>
+          <option>2024</option><option>2025</option><option selected>2026</option>
         </select>
         <span style="font-size:13px;color:var(--text3)">Marque os meses em que cada produto deve ser produzido</span>
         <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="salvarCronograma()">Salvar Cronograma</button>
@@ -678,7 +678,7 @@ tbody tr:hover td { background: #FAFAF8; }
       <div class="form-field">
         <label class="form-label">Ano</label>
         <select id="meta-ano">
-          <option>2024</option><option selected>2025</option><option>2026</option>
+          <option>2024</option><option>2025</option><option selected>2026</option>
         </select>
       </div>
       <div class="form-field">
@@ -812,8 +812,46 @@ async function fbLoad() {
 
     const cSnap = await getDocs(collection(db,'cronograma'));
     cSnap.forEach(d => { DB.cronograma[d.id] = d.data(); });
+
+    // Fallback para backup local caso o remoto venha sem dados
+    const temMesesRemotos = Object.keys(DB.meses).some(k => DB.meses[k]?.itens?.length > 0);
+    if(!temMesesRemotos) {
+      try {
+        const bk = JSON.parse(localStorage.getItem('gugeDB_bk') || '{}');
+        if (bk && typeof bk === 'object') {
+          DB = {
+            ...DB,
+            ...bk,
+            produtos: bk.produtos || DB.produtos,
+            meses: bk.meses || DB.meses,
+            metas: bk.metas || DB.metas,
+            cronograma: bk.cronograma || DB.cronograma,
+            nextId: bk.nextId || DB.nextId
+          };
+        }
+      } catch {}
+    }
   } catch(e) {
     console.error('Erro Firebase:', e);
+
+    // Em caso de erro de conexão, tenta carregar backup local
+    try {
+      const bk = JSON.parse(localStorage.getItem('gugeDB_bk') || '{}');
+      if (bk && typeof bk === 'object') {
+        DB = {
+          ...DB,
+          ...bk,
+          produtos: bk.produtos || DB.produtos,
+          meses: bk.meses || DB.meses,
+          metas: bk.metas || DB.metas,
+          cronograma: bk.cronograma || DB.cronograma,
+          nextId: bk.nextId || DB.nextId
+        };
+      }
+      notify('Dados carregados localmente (sem conexão Firebase).','warn');
+      return;
+    } catch {}
+
     notify('Erro ao carregar dados. Verifique a conexão.','warn');
   }
 }
@@ -862,6 +900,58 @@ let anualTab = 'financeiro';
 
 function chave(ano, mes) { return ano + '-' + String(mes).padStart(2,'0'); }
 
+// NOVO: escolhe ano/mês a partir dos dados preenchidos
+function getAnoComDadosOuAtual() {
+  const anosComDados = Object.keys(DB.meses)
+    .filter(k => DB.meses[k]?.itens?.length > 0)
+    .map(k => Number(k.split('-')[0]))
+    .filter(Number.isFinite);
+
+  return anosComDados.length ? Math.max(...anosComDados) : new Date().getFullYear();
+}
+
+function getMesMaisRecenteComDados(ano) {
+  const mesesComDados = Object.keys(DB.meses)
+    .filter(k => k.startsWith(String(ano) + '-') && DB.meses[k]?.itens?.length > 0)
+    .map(k => Number(k.split('-')[1]))
+    .filter(Number.isFinite);
+
+  return mesesComDados.length ? Math.max(...mesesComDados) : new Date().getMonth();
+}
+
+// NOVO: garante selects no ano atual (e no ano com dados)
+function setAnoAtualNosSelects() {
+  const anoAtual = String(new Date().getFullYear());
+  const ids = ['sel-ano','meta-ano','filtro-hist-ano','sel-anual-ano','sel-cron-ano'];
+
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+
+    const existeAnoAtual = Array.from(el.options).some(opt => String(opt.value) === anoAtual || String(opt.textContent) === anoAtual);
+    if(!existeAnoAtual) {
+      const opt = document.createElement('option');
+      opt.value = anoAtual;
+      opt.textContent = anoAtual;
+      el.appendChild(opt);
+    }
+  });
+
+  const anoComDados = String(getAnoComDadosOuAtual());
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    const existeAnoDados = Array.from(el.options).some(opt => String(opt.value) === anoComDados || String(opt.textContent) === anoComDados);
+    if(!existeAnoDados) {
+      const opt = document.createElement('option');
+      opt.value = anoComDados;
+      opt.textContent = anoComDados;
+      el.appendChild(opt);
+    }
+    el.value = anoComDados;
+  });
+}
+
 const pageTitles = {
   dashboard: ['Dashboard','Visão geral da coleção'],
   mensal: ['Planejar Mês','Defina os produtos e quantidades do mês'],
@@ -887,8 +977,10 @@ function goPage(name, el) {
 }
 
 function renderDashboard() {
-  const ano = new Date().getFullYear();
-  const mes = new Date().getMonth();
+  // CORREÇÃO: usa ano e mês com dados (não apenas "agora")
+  const ano = getAnoComDadosOuAtual();
+  const mes = getMesMaisRecenteComDados(ano);
+
   const k = chave(ano, mes);
   const dadosMes = DB.meses[k];
   const meta = DB.metas[k] || {};
@@ -1271,6 +1363,7 @@ async function adicionarItemMes() {
   await fbSaveMes(k);
   renderMensalContent(mesSelecionado.ano, mesSelecionado.mes);
   renderMeses();
+  renderDashboard();
   notify('Produto adicionado!','success');
 }
 
@@ -1282,6 +1375,7 @@ async function removerItemMes(idx) {
   await fbSaveMes(k);
   renderMensalContent(mesSelecionado.ano, mesSelecionado.mes);
   renderMeses();
+  renderDashboard();
 }
 
 async function salvarMes() {
@@ -1292,6 +1386,7 @@ async function salvarMes() {
   await fbSaveMes(k);
   notify('Mês salvo com sucesso!','success');
   renderMeses();
+  renderDashboard();
 }
 
 async function limparMes(k) {
@@ -1301,6 +1396,7 @@ async function limparMes(k) {
   await fbSaveMes(k);
   renderMensalContent(mesSelecionado.ano, mesSelecionado.mes);
   renderMeses();
+  renderDashboard();
 }
 
 function renderCatalogo() {
@@ -1364,6 +1460,7 @@ async function excluirProduto(id) {
   saveDB();
   await fbSaveProdutos();
   renderCatalogo();
+  renderDashboard();
   notify('Produto excluído','success');
 }
 
@@ -1390,6 +1487,7 @@ async function salvarProduto() {
   await fbSaveProdutos();
   closeModal('modal-produto');
   renderCatalogo();
+  renderDashboard();
   notify(editProdId?'Produto atualizado!':'Produto cadastrado!','success');
 }
 
@@ -1415,7 +1513,7 @@ async function salvarMeta() {
 }
 
 function renderHistorico() {
-  const ano = document.getElementById('filtro-hist-ano')?.value || '2025';
+  const ano = document.getElementById('filtro-hist-ano')?.value || String(getAnoComDadosOuAtual());
   const mesesAno = Object.keys(DB.meses).filter(k => k.startsWith(ano+'-') && DB.meses[k].itens && DB.meses[k].itens.length > 0).sort();
   const cont = document.getElementById('historico-list');
   if(!cont) return;
@@ -1467,7 +1565,7 @@ function switchAnualTab(tab, el) {
 }
 
 function renderAnual() {
-  const ano = document.getElementById('sel-anual-ano')?.value || '2025';
+  const ano = document.getElementById('sel-anual-ano')?.value || String(getAnoComDadosOuAtual());
   const cont = document.getElementById('anual-content');
   if(!cont) return;
 
@@ -1524,7 +1622,7 @@ function renderAnual() {
 }
 
 function renderCronograma() {
-  const ano = document.getElementById('sel-cron-ano')?.value || '2025';
+  const ano = document.getElementById('sel-cron-ano')?.value || String(getAnoComDadosOuAtual());
   const cont = document.getElementById('cron-content');
   if(!cont) return;
   const prods = DB.produtos.filter(p=>p.status==='ativo');
@@ -1557,7 +1655,7 @@ function toggleCron(ano, prodId, mes, el) {
 }
 
 async function salvarCronograma() {
-  const ano = document.getElementById('sel-cron-ano')?.value || '2025';
+  const ano = document.getElementById('sel-cron-ano')?.value || String(getAnoComDadosOuAtual());
   saveDB();
   notify('Salvando...','');
   await fbSaveCronograma(ano);
@@ -1617,6 +1715,7 @@ async function init() {
   setTimeout(() => { const b = document.getElementById('load-bar'); if(b) b.style.width='85%'; }, 100);
 
   await fbLoad();
+  setAnoAtualNosSelects();
 
   const ls = document.getElementById('loading-screen');
   if(ls) { ls.style.opacity='0'; ls.style.transition='opacity 0.3s'; setTimeout(()=>ls.remove(),300); }
