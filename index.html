@@ -6,6 +6,8 @@
 <title>Guge — Planejamento de Coleção</title>
 <meta name="robots" content="noindex,nofollow">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 <style>
 :root {
   --bg: #EDEAE3;
@@ -497,7 +499,7 @@ tbody tr:hover td { background: #FAFAF8; }
       <div class="topbar-sub" id="topbarSub">Visão geral da coleção</div>
     </div>
     <div class="topbar-actions">
-      <button class="btn btn-secondary btn-sm" onclick="exportarDados()">⬇ Exportar CSV</button>
+      <button class="btn btn-secondary btn-sm" onclick="exportarDados()">⬇ Exportar PDF</button>
       <button class="btn btn-primary btn-sm" onclick="openModalMeta()">Definir Metas</button>
     </div>
   </div>
@@ -813,7 +815,6 @@ async function fbLoad() {
     const cSnap = await getDocs(collection(db,'cronograma'));
     cSnap.forEach(d => { DB.cronograma[d.id] = d.data(); });
 
-    // Fallback para backup local caso o remoto venha sem dados
     const temMesesRemotos = Object.keys(DB.meses).some(k => DB.meses[k]?.itens?.length > 0);
     if(!temMesesRemotos) {
       try {
@@ -834,7 +835,6 @@ async function fbLoad() {
   } catch(e) {
     console.error('Erro Firebase:', e);
 
-    // Em caso de erro de conexão, tenta carregar backup local
     try {
       const bk = JSON.parse(localStorage.getItem('gugeDB_bk') || '{}');
       if (bk && typeof bk === 'object') {
@@ -900,7 +900,6 @@ let anualTab = 'financeiro';
 
 function chave(ano, mes) { return ano + '-' + String(mes).padStart(2,'0'); }
 
-// NOVO: escolhe ano/mês a partir dos dados preenchidos
 function getAnoComDadosOuAtual() {
   const anosComDados = Object.keys(DB.meses)
     .filter(k => DB.meses[k]?.itens?.length > 0)
@@ -919,7 +918,6 @@ function getMesMaisRecenteComDados(ano) {
   return mesesComDados.length ? Math.max(...mesesComDados) : new Date().getMonth();
 }
 
-// NOVO: garante selects no ano atual (e no ano com dados)
 function setAnoAtualNosSelects() {
   const anoAtual = String(new Date().getFullYear());
   const ids = ['sel-ano','meta-ano','filtro-hist-ano','sel-anual-ano','sel-cron-ano'];
@@ -977,7 +975,6 @@ function goPage(name, el) {
 }
 
 function renderDashboard() {
-  // CORREÇÃO: usa ano e mês com dados (não apenas "agora")
   const ano = getAnoComDadosOuAtual();
   const mes = getMesMaisRecenteComDados(ano);
 
@@ -1673,33 +1670,79 @@ function notify(msg, type='success') {
 }
 
 function exportarDados() {
-  const rows = [[
+  if (!window.jspdf || !window.jspdf.jsPDF || typeof window.jspdf.jsPDF !== 'function') {
+    notify('Biblioteca de PDF não carregada.', 'warn');
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+  const head = [[
     'Mês','Ano','Produto','Categoria','Gênero','Preço',
     'PP','P','M','G','GG','XGG','XXG',
     '36','38','40','42','44','46','48',
     'Total Peças','Total R$'
   ]];
 
+  const body = [];
   Object.keys(DB.meses).sort().forEach(k => {
-    const [ano,mes] = k.split('-');
-    (DB.meses[k].itens||[]).forEach(it => {
-      const prod = DB.produtos.find(p=>p.id===it.produtoId)||{};
-      rows.push([
-        MESES_FULL[parseInt(mes)],ano,prod.nome||'',prod.categoria||'',prod.genero||'',
-        it.preco||0,
-        it.grade?.PP||0,it.grade?.P||0,it.grade?.M||0,it.grade?.G||0,it.grade?.GG||0,it.grade?.XGG||0,it.grade?.XXG||0,
-        it.grade?.['36']||0,it.grade?.['38']||0,it.grade?.['40']||0,it.grade?.['42']||0,it.grade?.['44']||0,it.grade?.['46']||0,it.grade?.['48']||0,
-        it.qtdTotal||0,(it.total||0).toFixed(2)
+    const [ano, mes] = k.split('-');
+    (DB.meses[k].itens || []).forEach(it => {
+      const prod = DB.produtos.find(p => p.id === it.produtoId) || {};
+      body.push([
+        MESES_FULL[parseInt(mes, 10)],
+        ano,
+        prod.nome || '',
+        prod.categoria || '',
+        prod.genero || '',
+        Number(it.preco || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }),
+        it.grade?.PP || 0,
+        it.grade?.P || 0,
+        it.grade?.M || 0,
+        it.grade?.G || 0,
+        it.grade?.GG || 0,
+        it.grade?.XGG || 0,
+        it.grade?.XXG || 0,
+        it.grade?.['36'] || 0,
+        it.grade?.['38'] || 0,
+        it.grade?.['40'] || 0,
+        it.grade?.['42'] || 0,
+        it.grade?.['44'] || 0,
+        it.grade?.['46'] || 0,
+        it.grade?.['48'] || 0,
+        it.qtdTotal || 0,
+        Number(it.total || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })
       ]);
     });
   });
 
-  const csv = rows.map(r=>r.join(',')).join('\n');
-  const a = document.createElement('a');
-  a.href = 'data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
-  a.download = 'guge_planejamento.csv';
-  a.click();
-  notify('Exportado com sucesso!','success');
+  if (!body.length) {
+    notify('Sem dados para exportar.', 'warn');
+    return;
+  }
+
+  const dataAtual = new Date().toLocaleString('pt-BR');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.text('GUGE - Planejamento de Coleção', 14, 12);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.text(`Exportado em: ${dataAtual}`, 14, 18);
+
+  doc.autoTable({
+    head,
+    body,
+    startY: 22,
+    styles: { fontSize: 7, cellPadding: 1.5 },
+    headStyles: { fillColor: [27, 58, 107], textColor: 255 },
+    alternateRowStyles: { fillColor: [247, 245, 240] },
+    margin: { left: 8, right: 8 }
+  });
+
+  doc.save('guge_planejamento.pdf');
+  notify('PDF exportado com sucesso!', 'success');
 }
 
 async function init() {
