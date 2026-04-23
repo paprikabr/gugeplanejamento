@@ -379,12 +379,7 @@ tbody tr:hover td { background: #FAFAF8; }
   .content { padding: 20px 18px; }
   .topbar { padding: 14px 18px; }
 }
-.select-month-row { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; }
 .select-year { padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text); }
-.produto-row-section { background: #F8F5F2; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--text3); padding: 6px 12px; border-bottom: 1px solid var(--border); }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.chip { padding: 4px 12px; border-radius: 99px; background: var(--surface2); border: 1px solid var(--border); font-size: 12px; color: var(--text2); cursor: pointer; transition: all 0.15s; }
-.chip:hover, .chip.on { background: var(--accent); color: #fff; border-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -400,6 +395,7 @@ tbody tr:hover td { background: #FAFAF8; }
     <div class="nav-item" onclick="goPage('cronograma',this)"><span class="nav-icon">◷</span> Cronograma Anual</div>
     <div class="nav-section-label">Planejamento</div>
     <div class="nav-item" onclick="goPage('mensal',this)"><span class="nav-icon">◉</span> Planejar Mês</div>
+    <div class="nav-item" onclick="goPage('corte',this)"><span class="nav-icon">✂</span> Planejar Corte</div>
     <div class="nav-item" onclick="goPage('produtos',this)"><span class="nav-icon">◫</span> Catálogo de Produtos</div>
     <div class="nav-section-label">Histórico</div>
     <div class="nav-item" onclick="goPage('historico',this)"><span class="nav-icon">◌</span> Histórico Mensal</div>
@@ -489,6 +485,23 @@ tbody tr:hover td { background: #FAFAF8; }
         </div>
       </div>
       <div id="mensal-content"><div class="empty"><div class="empty-icon">◷</div><div class="empty-title">Selecione um mês para planejar</div></div></div>
+    </div>
+
+    <!-- NOVA ABA: PLANEJAR CORTE -->
+    <div id="page-corte" class="page">
+      <div style="display:flex;gap:14px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
+        <div>
+          <label class="form-label">Ano</label>
+          <select id="corte-ano" class="select-year" onchange="renderCorteMeses()">
+            <option>2024</option><option>2025</option><option selected>2026</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label class="form-label">Mês</label>
+          <div class="month-grid" id="corte-month-btns"></div>
+        </div>
+      </div>
+      <div id="corte-content"><div class="empty"><div class="empty-icon">✂</div><div class="empty-title">Selecione um mês para planejar o corte</div></div></div>
     </div>
 
     <div id="page-produtos" class="page">
@@ -615,6 +628,7 @@ async function fbSaveProdutos() { await setDoc(doc(db,'guge','produtos'), { list
 async function fbSaveMes(k) { await setDoc(doc(db,'meses',k), DB.meses[k] || {itens:[]}); }
 async function fbSaveMeta(k) { await setDoc(doc(db,'metas',k), DB.metas[k] || {}); }
 async function fbSaveCronograma(ano) { await setDoc(doc(db,'cronograma',String(ano)), DB.cronograma[ano] || {}); }
+async function fbSaveCorte(k) { await setDoc(doc(db,'corte',k), DB.corte[k] || {}); }
 
 async function fbLoad() {
   try {
@@ -633,12 +647,24 @@ async function fbLoad() {
     const cSnap = await getDocs(collection(db,'cronograma'));
     cSnap.forEach(d => { DB.cronograma[d.id] = d.data(); });
 
+    const coSnap = await getDocs(collection(db,'corte'));
+    coSnap.forEach(d => { DB.corte[d.id] = d.data(); });
+
     const temMesesRemotos = Object.keys(DB.meses).some(k => DB.meses[k]?.itens?.length > 0);
     if(!temMesesRemotos) {
       try {
         const bk = JSON.parse(localStorage.getItem('gugeDB_bk') || '{}');
         if (bk && typeof bk === 'object') {
-          DB = { ...DB, ...bk, produtos: bk.produtos || DB.produtos, meses: bk.meses || DB.meses, metas: bk.metas || DB.metas, cronograma: bk.cronograma || DB.cronograma, nextId: bk.nextId || DB.nextId };
+          DB = {
+            ...DB,
+            ...bk,
+            produtos: bk.produtos || DB.produtos,
+            meses: bk.meses || DB.meses,
+            metas: bk.metas || DB.metas,
+            cronograma: bk.cronograma || DB.cronograma,
+            corte: bk.corte || DB.corte,
+            nextId: bk.nextId || DB.nextId
+          };
         }
       } catch {}
     }
@@ -647,7 +673,16 @@ async function fbLoad() {
     try {
       const bk = JSON.parse(localStorage.getItem('gugeDB_bk') || '{}');
       if (bk && typeof bk === 'object') {
-        DB = { ...DB, ...bk, produtos: bk.produtos || DB.produtos, meses: bk.meses || DB.meses, metas: bk.metas || DB.metas, cronograma: bk.cronograma || DB.cronograma, nextId: bk.nextId || DB.nextId };
+        DB = {
+          ...DB,
+          ...bk,
+          produtos: bk.produtos || DB.produtos,
+          meses: bk.meses || DB.meses,
+          metas: bk.metas || DB.metas,
+          cronograma: bk.cronograma || DB.cronograma,
+          corte: bk.corte || DB.corte,
+          nextId: bk.nextId || DB.nextId
+        };
       }
       notify('Dados carregados localmente (sem conexão Firebase).','warn');
       return;
@@ -687,11 +722,13 @@ let DB = {
   meses: {},
   metas: {},
   cronograma: {},
+  corte: {},
   nextId: 19
 };
 
 let gradeMode = 'letters';
 let mesSelecionado = null;
+let corteMesSel = null;
 let editProdId = null;
 let anualTab = 'financeiro';
 
@@ -707,7 +744,7 @@ function getMesMaisRecenteComDados(ano) {
 }
 function setAnoAtualNosSelects() {
   const anoAtual = String(new Date().getFullYear());
-  const ids = ['sel-ano','meta-ano','filtro-hist-ano','sel-anual-ano','sel-cron-ano'];
+  const ids = ['sel-ano','meta-ano','filtro-hist-ano','sel-anual-ano','sel-cron-ano','corte-ano'];
   ids.forEach(id => {
     const el = document.getElementById(id);
     if(!el) return;
@@ -733,6 +770,7 @@ function setAnoAtualNosSelects() {
 const pageTitles = {
   dashboard: ['Dashboard','Visão geral da coleção'],
   mensal: ['Planejar Mês','Defina os produtos e quantidades do mês'],
+  corte: ['Planejar Corte','Jeans e Moda Casual — referências, tecido e produção real'],
   produtos: ['Catálogo de Produtos','Gerencie seus produtos e referências'],
   historico: ['Histórico Mensal','Todos os meses planejados'],
   anual: ['Visão Anual','Faturamento e peças ao longo do ano'],
@@ -747,6 +785,7 @@ function goPage(name, el) {
   document.getElementById('topbarTitle').textContent = pageTitles[name][0];
   document.getElementById('topbarSub').textContent = pageTitles[name][1];
   if(name==='mensal') renderMeses();
+  if(name==='corte') renderCorteMeses();
   if(name==='catalogo'||name==='produtos') renderCatalogo();
   if(name==='historico') renderHistorico();
   if(name==='anual') renderAnual();
@@ -1069,6 +1108,224 @@ async function limparMes(k) {
   renderDashboard();
 }
 
+// ========= PLANEJAR CORTE (integrado) =========
+function renderCorteMeses(){
+  const ano = document.getElementById('corte-ano').value;
+  const cont = document.getElementById('corte-month-btns');
+  if(!cont) return;
+  cont.innerHTML = MESES.map((m,i) => {
+    const k = chave(ano,i);
+    const d = DB.corte[k];
+    const tem = d && ((d.jeans?.refs?.length || 0) + (d.casual?.refs?.length || 0) > 0);
+    const isA = corteMesSel && corteMesSel.ano==ano && corteMesSel.mes==i;
+    return `<div class="month-btn ${isA?'active':''} ${tem&&!isA?'has-data':''}" onclick="selecionarCorte(${ano},${i},this)">${m}${tem?'<div class="dot"></div>':''}</div>`;
+  }).join('');
+}
+function selecionarCorte(ano,mes,el){
+  corteMesSel = {ano,mes};
+  document.querySelectorAll('#corte-month-btns .month-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderCorteContent(ano,mes);
+}
+function renderCorteContent(ano,mes){
+  const k = chave(ano,mes);
+  if(!DB.corte[k]) DB.corte[k] = {
+    jeans: {diasUteis:'',dataInicio:'',dataEntrega:'',prevMes:'',refs:[],prodReal:'',tecidoDisp:'',tecidoConsumido:''},
+    casual:{diasUteis:'',dataInicio:'',dataEntrega:'',prevMes:'',refs:[],prodReal:'',tecidoDisp:'',tecidoConsumido:''}
+  };
+  document.getElementById('corte-content').innerHTML = `
+    <div class="tabs" id="corte-tabs">
+      <button class="tab-btn active" onclick="switchCorteTab('jeans',this)">✂ Jeans</button>
+      <button class="tab-btn" onclick="switchCorteTab('casual',this)">✂ Moda Casual</button>
+    </div>
+    <div id="corte-tab-jeans">${renderCorteSetor('jeans', DB.corte[k].jeans, ano, mes)}</div>
+    <div id="corte-tab-casual" style="display:none">${renderCorteSetor('casual', DB.corte[k].casual, ano, mes)}</div>
+  `;
+}
+function switchCorteTab(tab, el){
+  document.querySelectorAll('#corte-tabs .tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('corte-tab-jeans').style.display = tab==='jeans' ? '' : 'none';
+  document.getElementById('corte-tab-casual').style.display = tab==='casual' ? '' : 'none';
+}
+function renderCorteSetor(setor, d, ano, mes){
+  const refs = d.refs || [];
+  const tP = refs.reduce((s,r)=>s+(parseInt(r.qtd)||0),0);
+  const tT = refs.reduce((s,r)=>s+(parseFloat(r.mediaTecido)||0)*(parseInt(r.qtd)||0),0);
+  const dias = parseInt(d.diasUteis)||0;
+  const prev = parseInt(d.prevMes)||0;
+  const prevDia = dias && prev ? Math.round(prev/dias) : '—';
+  const pR = parseInt(d.prodReal)||0;
+  const tD = parseFloat(d.tecidoDisp)||0;
+  const saldo = tD - tT;
+  const pctP = prev ? Math.min(100, Math.round(pR/prev*100)) : 0;
+  const nome = setor === 'jeans' ? 'Jeans' : 'Moda Casual';
+  return `
+    <div>
+      <div class="card">
+        <div class="card-header" style="margin-bottom:12px">
+          <div class="card-title">${nome} — ${MESES_FULL[mes]} ${ano}</div>
+          <button class="btn btn-primary btn-sm" onclick="salvarCorte()">Salvar</button>
+        </div>
+        <div class="form-grid form-grid-4">
+          <div class="form-field"><label class="form-label">Dias Úteis</label><input type="number" id="${setor}-diasUteis" value="${d.diasUteis||''}" placeholder="20" oninput="atualizarCorteCalc('${setor}')"></div>
+          <div class="form-field"><label class="form-label">Data Início</label><input type="date" id="${setor}-dataInicio" value="${d.dataInicio||''}"></div>
+          <div class="form-field"><label class="form-label">Data Entrega</label><input type="date" id="${setor}-dataEntrega" value="${d.dataEntrega||''}"></div>
+          <div class="form-field"><label class="form-label">Previsto pro Mês</label><input type="number" id="${setor}-prevMes" value="${d.prevMes||''}" placeholder="820" oninput="atualizarCorteCalc('${setor}')"></div>
+        </div>
+      </div>
+
+      <div class="metrics-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px">
+        <div class="metric-card"><div class="metric-label">Previsto / Dia</div><div class="metric-value" style="font-size:20px" id="${setor}-prevDia">${prevDia}</div><div class="metric-sub">peças por dia útil</div></div>
+        <div class="metric-card"><div class="metric-label">Total Planejado</div><div class="metric-value" style="font-size:20px" id="${setor}-totalPlan">${tP.toLocaleString('pt-BR')}</div><div class="metric-sub">peças nas referências</div></div>
+        <div class="metric-card"><div class="metric-label">Tecido a Consumir</div><div class="metric-value" style="font-size:20px" id="${setor}-tecConsumir">${tT.toFixed(1)} m</div><div class="metric-sub">metros estimados</div></div>
+        <div class="metric-card ${pR>0&&pR>=prev?'accent':''}"><div class="metric-label">Produção Real</div><div class="metric-value" style="font-size:20px">${pR>0?pR.toLocaleString('pt-BR'):'—'}</div><div class="metric-sub">${pR>0&&dias?Math.round(pR/dias)+' pçs/dia':''}</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">Referências de Corte</div></div>
+        <div style="display:grid;grid-template-columns:80px 1fr 1fr 1fr 100px 110px 80px auto;gap:8px;align-items:end;margin-bottom:12px">
+          <div><label class="form-label">Ref</label><input type="text" id="${setor}-add-ref" placeholder="30802"></div>
+          <div><label class="form-label">Modelo</label><input type="text" id="${setor}-add-modelo" placeholder="ex: Bermuda Mas"></div>
+          <div><label class="form-label">Tecido</label><input type="text" id="${setor}-add-tecido" placeholder="ex: Madruga"></div>
+          <div><label class="form-label">Fornecedor</label><input type="text" id="${setor}-add-forn" placeholder="opcional"></div>
+          <div><label class="form-label">Quantidade</label><input type="number" id="${setor}-add-qtd" placeholder="0" oninput="calcCorteTotal('${setor}')"></div>
+          <div><label class="form-label">Média Tecido (m)</label><input type="number" id="${setor}-add-med" placeholder="0,00" step="0.01" oninput="calcCorteTotal('${setor}')"></div>
+          <div><label class="form-label">Total Tec</label><input type="text" id="${setor}-add-totaltec" readonly placeholder="0 m"></div>
+          <div style="padding-bottom:2px"><button class="btn btn-primary btn-sm" onclick="adicionarCorteRef('${setor}')">+ Add</button></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>Referência</th><th>Modelo</th><th>Tecido</th><th>Fornecedor</th><th style="text-align:right">Qtd</th><th style="text-align:right">Média (m)</th><th style="text-align:right">Total Tec</th><th></th></tr></thead>
+            <tbody id="${setor}-tbody-refs">${renderCorteTbody(setor, refs)}</tbody>
+            ${refs.length ? `<tfoot><tr style="background:var(--surface2)"><td colspan="5" style="font-weight:600;font-size:12px;padding:8px 12px">TOTAL</td><td style="text-align:right;font-weight:700;padding:8px 12px">${tP.toLocaleString('pt-BR')}</td><td style="padding:8px 12px;text-align:right">—</td><td style="text-align:right;font-weight:700;color:var(--accent);padding:8px 12px">${tT.toFixed(1)} m</td><td></td></tr></tfoot>` : ''}
+          </table>
+        </div>
+        ${refs.length===0 ? '<div class="empty"><div class="empty-icon">✂</div><div class="empty-title">Nenhuma referência adicionada</div></div>' : ''}
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Produção Real</div></div>
+          <div class="form-grid form-grid-2">
+            <div class="form-field"><label class="form-label">Peças Cortadas (real)</label><input type="number" id="${setor}-prodReal" value="${d.prodReal||''}" placeholder="0"></div>
+            <div class="form-field"><label class="form-label">Tecido Consumido (m)</label><input type="number" id="${setor}-tecidoConsumido" value="${d.tecidoConsumido||''}" placeholder="0,00" step="0.01"></div>
+          </div>
+          ${pR>0 ? `<div style="margin-top:12px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span style="color:var(--text3)">Progresso</span><span style="font-weight:500">${pctP}%</span></div><div class="progress-bar" style="height:8px"><div class="progress-fill" style="background:var(--green);width:${pctP}%"></div></div></div>` : ''}
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Controle de Tecido</div></div>
+          <div class="form-field" style="margin-bottom:12px"><label class="form-label">Tecido Disponível em Estoque (m)</label><input type="number" id="${setor}-tecidoDisp" value="${d.tecidoDisp||''}" placeholder="0,00" step="0.01" oninput="atualizarCorteCalc('${setor}')"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div style="padding:10px;background:var(--surface2);border-radius:var(--radius-sm)"><div style="color:var(--text3);font-size:11px;margin-bottom:3px">A Consumir</div><div style="font-weight:600" id="${setor}-saldo-consumir">${tT.toFixed(1)} m</div></div>
+            <div style="padding:10px;background:${saldo>=0?'var(--green-bg)':'var(--red-bg)'};border-radius:var(--radius-sm)"><div style="color:var(--text3);font-size:11px;margin-bottom:3px">Saldo</div><div style="font-weight:600;color:${saldo>=0?'var(--green)':'var(--red)'}" id="${setor}-saldo-val">${tD>0?(saldo>=0?'+':'')+saldo.toFixed(1)+' m':'—'}</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+function renderCorteTbody(setor, refs){
+  if(!refs?.length) return '';
+  return refs.map((r,i)=>`
+    <tr>
+      <td style="color:var(--text3)">${i+1}</td>
+      <td style="font-weight:600;color:var(--accent)">${r.ref||'—'}</td>
+      <td style="font-weight:500">${r.modelo||'—'}</td>
+      <td>${r.tecido||'—'}</td>
+      <td style="color:var(--text3);font-size:12px">${r.forn||'—'}</td>
+      <td style="text-align:right;font-weight:500">${(parseInt(r.qtd)||0).toLocaleString('pt-BR')}</td>
+      <td style="text-align:right">${parseFloat(r.mediaTecido)||0} m</td>
+      <td style="text-align:right;font-weight:600;color:var(--accent)">${((parseFloat(r.mediaTecido)||0)*(parseInt(r.qtd)||0)).toFixed(1)} m</td>
+      <td><button class="btn btn-danger btn-sm" onclick="removerCorteRef('${setor}',${i})">✕</button></td>
+    </tr>
+  `).join('');
+}
+function calcCorteTotal(setor){
+  const q = parseInt(document.getElementById(setor+'-add-qtd')?.value) || 0;
+  const m = parseFloat(document.getElementById(setor+'-add-med')?.value) || 0;
+  const el = document.getElementById(setor+'-add-totaltec');
+  if(el) el.value = (q*m).toFixed(1)+' m';
+}
+function atualizarCorteCalc(setor){
+  const dias = parseInt(document.getElementById(setor+'-diasUteis')?.value) || 0;
+  const prev = parseInt(document.getElementById(setor+'-prevMes')?.value) || 0;
+  const el = document.getElementById(setor+'-prevDia');
+  if(el) el.textContent = dias && prev ? Math.round(prev/dias) : '—';
+  if(!corteMesSel) return;
+  const k = chave(corteMesSel.ano, corteMesSel.mes);
+  const refs = DB.corte[k]?.[setor]?.refs || [];
+  const tT = refs.reduce((s,r)=>s+(parseFloat(r.mediaTecido)||0)*(parseInt(r.qtd)||0),0);
+  const disp = parseFloat(document.getElementById(setor+'-tecidoDisp')?.value) || 0;
+  const saldo = disp - tT;
+  const cEl = document.getElementById(setor+'-saldo-consumir');
+  if(cEl) cEl.textContent = tT.toFixed(1)+' m';
+  const sEl = document.getElementById(setor+'-saldo-val');
+  if(sEl){
+    sEl.textContent = disp>0 ? (saldo>=0?'+':'')+saldo.toFixed(1)+' m' : '—';
+    sEl.style.color = saldo>=0 ? 'var(--green)' : 'var(--red)';
+    if(sEl.parentElement) sEl.parentElement.style.background = saldo>=0 ? 'var(--green-bg)' : 'var(--red-bg)';
+  }
+}
+function coletarCorteSetor(setor){
+  if(!corteMesSel) return null;
+  const k = chave(corteMesSel.ano, corteMesSel.mes);
+  return {
+    diasUteis: document.getElementById(setor+'-diasUteis')?.value || '',
+    dataInicio: document.getElementById(setor+'-dataInicio')?.value || '',
+    dataEntrega: document.getElementById(setor+'-dataEntrega')?.value || '',
+    prevMes: document.getElementById(setor+'-prevMes')?.value || '',
+    prodReal: document.getElementById(setor+'-prodReal')?.value || '',
+    tecidoDisp: document.getElementById(setor+'-tecidoDisp')?.value || '',
+    tecidoConsumido: document.getElementById(setor+'-tecidoConsumido')?.value || '',
+    refs: DB.corte[k]?.[setor]?.refs || []
+  };
+}
+function adicionarCorteRef(setor){
+  if(!corteMesSel) return;
+  const modelo = document.getElementById(setor+'-add-modelo')?.value.trim();
+  if(!modelo){ notify('Informe o modelo','warn'); return; }
+  const qtd = parseInt(document.getElementById(setor+'-add-qtd')?.value) || 0;
+  if(!qtd){ notify('Informe a quantidade','warn'); return; }
+  const k = chave(corteMesSel.ano, corteMesSel.mes);
+  if(!DB.corte[k]) DB.corte[k] = { jeans:{refs:[]}, casual:{refs:[]} };
+  if(!DB.corte[k][setor]) DB.corte[k][setor] = { refs: [] };
+  DB.corte[k][setor] = { ...DB.corte[k][setor], ...coletarCorteSetor(setor) };
+  DB.corte[k][setor].refs.push({
+    ref: document.getElementById(setor+'-add-ref')?.value.trim() || '',
+    modelo,
+    tecido: document.getElementById(setor+'-add-tecido')?.value.trim() || '',
+    forn: document.getElementById(setor+'-add-forn')?.value.trim() || '',
+    qtd,
+    mediaTecido: parseFloat(document.getElementById(setor+'-add-med')?.value) || 0
+  });
+  const tabAtiva = setor;
+  renderCorteContent(corteMesSel.ano, corteMesSel.mes);
+  if(tabAtiva === 'casual') document.querySelectorAll('#corte-tabs .tab-btn')[1].click();
+}
+function removerCorteRef(setor, idx){
+  if(!corteMesSel) return;
+  const k = chave(corteMesSel.ano, corteMesSel.mes);
+  DB.corte[k][setor].refs.splice(idx, 1);
+  const tab = setor;
+  renderCorteContent(corteMesSel.ano, corteMesSel.mes);
+  if(tab === 'casual') document.querySelectorAll('#corte-tabs .tab-btn')[1].click();
+}
+async function salvarCorte(){
+  if(!corteMesSel) return;
+  const k = chave(corteMesSel.ano, corteMesSel.mes);
+  if(!DB.corte[k]) DB.corte[k] = { jeans:{refs:[]}, casual:{refs:[]} };
+  ['jeans','casual'].forEach(s => {
+    const d = coletarCorteSetor(s);
+    if(d) DB.corte[k][s] = { ...DB.corte[k][s], ...d };
+  });
+  saveDB();
+  notify('Salvando...','');
+  await fbSaveCorte(k);
+  renderCorteMeses();
+  notify('Corte salvo com sucesso!','success');
+}
+
 function renderCatalogo() {
   const busca = document.getElementById('busca-produto')?.value.toLowerCase()||'';
   const genero = document.getElementById('filtro-genero')?.value||'';
@@ -1200,6 +1457,7 @@ function irParaMes(ano, mes) {
   mesSelecionado = {ano:parseInt(ano,10), mes};
   goPage('mensal', document.querySelector('[onclick*=mensal]'));
 }
+
 function switchAnualTab(tab, el) {
   anualTab = tab;
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
@@ -1417,35 +1675,47 @@ async function init() {
   renderCatalogo();
 }
 
-window.goPage = goPage;
-window.selecionarMes = selecionarMes;
-window.renderMeses = renderMeses;
-window.adicionarItemMes = adicionarItemMes;
-window.removerItemMes = removerItemMes;
-window.salvarMes = salvarMes;
-window.limparMes = limparMes;
-window.preencherPreco = preencherPreco;
-window.calcAddTotal = calcAddTotal;
-window.distGradeAdd = distGradeAdd;
-window.syncGrade = syncGrade;
-window.openModalProduto = openModalProduto;
-window.editarProduto = editarProduto;
-window.excluirProduto = excluirProduto;
-window.salvarProduto = salvarProduto;
-window.renderCatalogo = renderCatalogo;
-window.openModalMeta = openModalMeta;
-window.salvarMeta = salvarMeta;
-window.renderHistorico = renderHistorico;
-window.irParaMes = irParaMes;
-window.renderAnual = renderAnual;
-window.switchAnualTab = switchAnualTab;
-window.renderCronograma = renderCronograma;
-window.toggleCron = toggleCron;
-window.salvarCronograma = salvarCronograma;
-window.closeModal = closeModal;
-window.exportarDados = exportarDados;
+Object.assign(window, {
+  goPage,
+  selecionarMes,
+  renderMeses,
+  adicionarItemMes,
+  removerItemMes,
+  salvarMes,
+  limparMes,
+  preencherPreco,
+  calcAddTotal,
+  distGradeAdd,
+  syncGrade,
+  openModalProduto,
+  editarProduto,
+  excluirProduto,
+  salvarProduto,
+  renderCatalogo,
+  openModalMeta,
+  salvarMeta,
+  renderHistorico,
+  irParaMes,
+  renderAnual,
+  switchAnualTab,
+  renderCronograma,
+  toggleCron,
+  salvarCronograma,
+  closeModal,
+  exportarDados,
+  // corte
+  renderCorteMeses,
+  selecionarCorte,
+  switchCorteTab,
+  calcCorteTotal,
+  atualizarCorteCalc,
+  adicionarCorteRef,
+  removerCorteRef,
+  salvarCorte
+});
 
 init();
 </script>
 </body>
 </html>
+
