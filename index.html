@@ -396,6 +396,7 @@ tbody tr:hover td { background: #FAFAF8; }
     <div class="nav-section-label">Planejamento</div>
     <div class="nav-item" onclick="goPage('mensal',this)"><span class="nav-icon">◉</span> Planejar Mês</div>
     <div class="nav-item" onclick="goPage('corte',this)"><span class="nav-icon">✂</span> Planejar Corte</div>
+    <div class="nav-item" onclick="goPage('mixsemanal',this)"><span class="nav-icon">◈</span> Mix Semanal</div>
     <div class="nav-item" onclick="goPage('produtos',this)"><span class="nav-icon">◫</span> Catálogo de Produtos</div>
     <div class="nav-section-label">Histórico</div>
     <div class="nav-item" onclick="goPage('historico',this)"><span class="nav-icon">◌</span> Histórico Mensal</div>
@@ -502,6 +503,25 @@ tbody tr:hover td { background: #FAFAF8; }
         </div>
       </div>
       <div id="corte-content"><div class="empty"><div class="empty-icon">✂</div><div class="empty-title">Selecione um mês para planejar o corte</div></div></div>
+    </div>
+
+    <!-- MIX SEMANAL -->
+    <div id="page-mixsemanal" class="page">
+      <div style="display:flex;gap:14px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
+        <div>
+          <label class="form-label">Ano</label>
+          <select id="mix-ano" class="select-year" onchange="renderMixMeses()">
+            <option>2024</option><option>2025</option><option selected>2026</option>
+          </select>
+        </div>
+        <div style="flex:1">
+          <label class="form-label">Mês</label>
+          <div class="month-grid" id="mix-month-btns"></div>
+        </div>
+      </div>
+      <div id="mix-content">
+        <div class="empty"><div class="empty-icon">◈</div><div class="empty-title">Selecione um mês para planejar o mix semanal</div><p style="font-size:12px;color:var(--text3);margin-top:4px">4 looks por semana · planejados 1 mês antes · fotografados com antecedência</p></div>
+      </div>
     </div>
 
     <div id="page-produtos" class="page">
@@ -629,6 +649,7 @@ async function fbSaveMes(k) { await setDoc(doc(db,'meses',k), DB.meses[k] || {it
 async function fbSaveMeta(k) { await setDoc(doc(db,'metas',k), DB.metas[k] || {}); }
 async function fbSaveCronograma(ano) { await setDoc(doc(db,'cronograma',String(ano)), DB.cronograma[ano] || {}); }
 async function fbSaveCorte(k) { await setDoc(doc(db,'corte',k), DB.corte[k] || {}); }
+async function fbSaveMix(k) { await setDoc(doc(db,'mix',k), DB.mix[k] || {}); }
 
 async function fbLoad() {
   try {
@@ -650,6 +671,9 @@ async function fbLoad() {
     const coSnap = await getDocs(collection(db,'corte'));
     coSnap.forEach(d => { DB.corte[d.id] = d.data(); });
 
+    const mxSnap = await getDocs(collection(db,'mix'));
+    mxSnap.forEach(d => { DB.mix[d.id] = d.data(); });
+
     const temMesesRemotos = Object.keys(DB.meses).some(k => DB.meses[k]?.itens?.length > 0);
     if(!temMesesRemotos) {
       try {
@@ -663,6 +687,7 @@ async function fbLoad() {
             metas: bk.metas || DB.metas,
             cronograma: bk.cronograma || DB.cronograma,
             corte: bk.corte || DB.corte,
+            mix: bk.mix || DB.mix,
             nextId: bk.nextId || DB.nextId
           };
         }
@@ -681,6 +706,7 @@ async function fbLoad() {
           metas: bk.metas || DB.metas,
           cronograma: bk.cronograma || DB.cronograma,
           corte: bk.corte || DB.corte,
+          mix: bk.mix || DB.mix,
           nextId: bk.nextId || DB.nextId
         };
       }
@@ -723,6 +749,7 @@ let DB = {
   metas: {},
   cronograma: {},
   corte: {},
+  mix: {},
   nextId: 19
 };
 
@@ -744,7 +771,7 @@ function getMesMaisRecenteComDados(ano) {
 }
 function setAnoAtualNosSelects() {
   const anoAtual = String(new Date().getFullYear());
-  const ids = ['sel-ano','meta-ano','filtro-hist-ano','sel-anual-ano','sel-cron-ano','corte-ano'];
+  const ids = ['sel-ano','meta-ano','filtro-hist-ano','sel-anual-ano','sel-cron-ano','corte-ano','mix-ano'];
   ids.forEach(id => {
     const el = document.getElementById(id);
     if(!el) return;
@@ -771,6 +798,7 @@ const pageTitles = {
   dashboard: ['Dashboard','Visão geral da coleção'],
   mensal: ['Planejar Mês','Defina os produtos e quantidades do mês'],
   corte: ['Planejar Corte','Jeans e Moda Casual — referências, tecido e produção real'],
+  mixsemanal: ['Mix Semanal','4 looks por semana — planeje 1 mês antes e gere o calendário de lançamento'],
   produtos: ['Catálogo de Produtos','Gerencie seus produtos e referências'],
   historico: ['Histórico Mensal','Todos os meses planejados'],
   anual: ['Visão Anual','Faturamento e peças ao longo do ano'],
@@ -786,6 +814,7 @@ function goPage(name, el) {
   document.getElementById('topbarSub').textContent = pageTitles[name][1];
   if(name==='mensal') renderMeses();
   if(name==='corte') renderCorteMeses();
+  if(name==='mixsemanal') renderMixMeses();
   if(name==='catalogo'||name==='produtos') renderCatalogo();
   if(name==='historico') renderHistorico();
   if(name==='anual') renderAnual();
@@ -1718,4 +1747,3 @@ init();
 </script>
 </body>
 </html>
-
