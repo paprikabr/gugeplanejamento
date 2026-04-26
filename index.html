@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+
 <style>
 :root {
   --bg: #EDEAE3;
@@ -381,197 +382,7 @@ tbody tr:hover td { background: #FAFAF8; }
 }
 .select-year { padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--text); }
 
-/* ── PRODUTO CARDS ───────────────────────────────────────── */
-.prod-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-  transition: box-shadow 0.18s, transform 0.18s;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-}
-.prod-card:hover {
-  box-shadow: 0 6px 24px rgba(27,42,74,0.13);
-  transform: translateY(-2px);
-}
-.prod-card-img {
-  width: 100%;
-  aspect-ratio: 3/4;
-  object-fit: cover;
-  background: var(--surface2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36px;
-  color: var(--border);
-  position: relative;
-}
-.prod-card-img img {
-  width: 100%; height: 100%; object-fit: cover; display: block;
-}
-.prod-card-status-badge {
-  position: absolute;
-  top: 8px; left: 8px;
-  font-size: 9px;
-  font-weight: 600;
-  letter-spacing: .4px;
-  padding: 3px 7px;
-  border-radius: 20px;
-  text-transform: uppercase;
-}
-.prod-card-menu {
-  position: absolute; top: 8px; right: 8px;
-  background: rgba(255,255,255,.85);
-  border: none; border-radius: 50%;
-  width: 26px; height: 26px;
-  cursor: pointer; font-size: 14px;
-  display: flex; align-items: center; justify-content: center;
-  opacity: 0; transition: opacity .15s;
-}
-.prod-card:hover .prod-card-menu { opacity: 1; }
-.prod-card-body {
-  padding: 10px 12px 12px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.prod-card-ref { font-size: 10px; color: var(--text3); font-weight: 500; letter-spacing: .3px; }
-.prod-card-nome { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
-.prod-card-cat { font-size: 11px; color: var(--text3); margin-top: 1px; }
-.prod-card-preco {
-  font-size: 13px; font-weight: 600; color: var(--accent);
-  margin-top: 4px;
-}
-.prod-card-producao {
-  font-size: 10px; color: var(--text3);
-  display: flex; align-items: center; gap: 4px;
-  margin-top: 2px;
-}
-
-/* Pipeline de status */
-.status-pipeline {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  margin-top: 8px;
-  overflow: hidden;
-  border-radius: 4px;
-}
-.status-step {
-  flex: 1;
-  height: 4px;
-  background: var(--surface2);
-  position: relative;
-}
-.status-step.done { background: var(--accent); }
-.status-step.current { background: var(--accent2); }
-.status-step + .status-step { margin-left: 2px; }
-
-/* Status badges */
-.sb-planejado    { background: #E8EDF5; color: #1B3A6B; }
-.sb-cortado      { background: #FFF3CD; color: #7A5A0A; }
-.sb-costurado    { background: #E0F0E8; color: #1E6B4A; }
-.sb-pronto-foto  { background: #F5E8F0; color: #7A1B5A; }
-.sb-fotografado  { background: #E8F5F0; color: #1A6B5A; }
-.sb-lancado      { background: #1B3A6B; color: #fff; }
-
-/* ── INTELIGÊNCIA / EQUILÍBRIO ──────────────────────────── */
-.eq-alerta {
-  display: flex; align-items: flex-start; gap: 10px;
-  padding: 8px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-}
-.eq-alerta.eq-warn  { background: var(--amber-bg); border-left: 3px solid #C49A0A; }
-.eq-alerta.eq-ok    { background: var(--green-bg);  border-left: 3px solid var(--green); }
-.eq-alerta.eq-info  { background: #EEF2FA;           border-left: 3px solid var(--accent2); }
-.eq-alerta.eq-err   { background: var(--red-bg);     border-left: 3px solid var(--red); }
-.eq-alerta-icon { font-size: 14px; flex-shrink: 0; margin-top: -1px; }
-.eq-alerta strong { display: block; margin-bottom: 1px; }
-
-/* ── ANOTAÇÕES RÁPIDAS ──────────────────────────────────── */
-.notas-box {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 14px 16px;
-}
-.nota-item {
-  display: flex; align-items: flex-start; gap: 8px;
-  padding: 7px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 12px; color: var(--text);
-}
-.nota-item:last-child { border-bottom: none; }
-.nota-item button {
-  margin-left: auto; flex-shrink: 0;
-  background: none; border: none; cursor: pointer;
-  color: var(--text3); font-size: 13px; padding: 0 2px;
-  opacity: 0; transition: opacity .15s;
-}
-.nota-item:hover button { opacity: 1; }
-.nota-input-row {
-  display: flex; gap: 6px; margin-top: 10px;
-}
-.nota-input-row input {
-  flex: 1; padding: 7px 10px;
-  border: 1px solid var(--border); border-radius: 6px;
-  font-family: 'DM Sans', sans-serif; font-size: 12px;
-  background: var(--bg); color: var(--text);
-}
-.nota-input-row input:focus { outline: none; border-color: var(--accent); }
-
-/* ── MIX CALENDAR THUMBS ────────────────────────────────── */
-.mix-thumb-strip {
-  display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px;
-}
-.mix-thumb {
-  width: 44px; height: 54px;
-  border-radius: 5px;
-  object-fit: cover;
-  border: 1.5px solid var(--border);
-  background: var(--surface2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; color: var(--text3);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-.mix-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.mix-semana-card-v2 {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-}
-.mix-semana-head-v2 {
-  padding: 10px 14px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-}
-.mix-semana-label {
-  font-size: 11px; font-weight: 700;
-  text-transform: uppercase; letter-spacing: 1px;
-  color: var(--accent);
-}
-.mix-semana-date { font-size: 11px; color: var(--text3); margin-top: 2px; }
-.mix-semana-body-v2 { padding: 12px 14px; }
-.mix-look-row {
-  display: flex; align-items: center; gap: 9px;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--border);
-  font-size: 12px;
-}
-.mix-look-row:last-child { border-bottom: none; }
-
-/* Prod foto upload */
-#prod-foto-area { cursor: pointer; }
-
+/* ── MIX SEMANAL ─────────────────────────────────────────── */
 .mix-semanas-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -842,9 +653,9 @@ tbody tr:hover td { background: #FAFAF8; }
   display: block;
   margin-top: 6px;
 }
-
 </style>
 </head>
+
 <body>
 <div class="app">
 <nav class="sidebar">
@@ -856,11 +667,13 @@ tbody tr:hover td { background: #FAFAF8; }
     <div class="nav-section-label">Visão Geral</div>
     <div class="nav-item active" onclick="goPage('dashboard',this)"><span class="nav-icon">◈</span> Dashboard</div>
     <div class="nav-item" onclick="goPage('cronograma',this)"><span class="nav-icon">◷</span> Cronograma Anual</div>
+
     <div class="nav-section-label">Planejamento</div>
     <div class="nav-item" onclick="goPage('mensal',this)"><span class="nav-icon">◉</span> Planejar Mês</div>
     <div class="nav-item" onclick="goPage('corte',this)"><span class="nav-icon">✂</span> Planejar Corte</div>
     <div class="nav-item" onclick="goPage('mixsemanal',this)"><span class="nav-icon">◈</span> Mix Semanal</div>
     <div class="nav-item" onclick="goPage('produtos',this)"><span class="nav-icon">◫</span> Catálogo de Produtos</div>
+
     <div class="nav-section-label">Histórico</div>
     <div class="nav-item" onclick="goPage('historico',this)"><span class="nav-icon">◌</span> Histórico Mensal</div>
     <div class="nav-item" onclick="goPage('anual',this)"><span class="nav-icon">◐</span> Visão Anual</div>
@@ -951,7 +764,6 @@ tbody tr:hover td { background: #FAFAF8; }
       <div id="mensal-content"><div class="empty"><div class="empty-icon">◷</div><div class="empty-title">Selecione um mês para planejar</div></div></div>
     </div>
 
-    <!-- NOVA ABA: PLANEJAR CORTE -->
     <div id="page-corte" class="page">
       <div style="display:flex;gap:14px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
         <div>
@@ -968,7 +780,6 @@ tbody tr:hover td { background: #FAFAF8; }
       <div id="corte-content"><div class="empty"><div class="empty-icon">✂</div><div class="empty-title">Selecione um mês para planejar o corte</div></div></div>
     </div>
 
-    <!-- MIX SEMANAL -->
     <div id="page-mixsemanal" class="page">
       <div style="display:flex;gap:14px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
         <div>
@@ -983,79 +794,31 @@ tbody tr:hover td { background: #FAFAF8; }
         </div>
       </div>
       <div id="mix-content">
-        <div class="empty"><div class="empty-icon">◈</div><div class="empty-title">Selecione um mês para planejar o mix semanal</div><p style="font-size:12px;color:var(--text3);margin-top:4px">4 looks por semana · planejados 1 mês antes · fotografados com antecedência</p></div>
-      </div>
-
-      <!-- Anotações rápidas do mês -->
-      <div id="mix-notas-box" style="margin-top:16px;display:none">
-        <div class="notas-box">
-          <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between">
-            ✏ Anotações Rápidas
-            <span style="font-size:10px;font-weight:400;color:var(--text3)">Visível apenas para o setor de criação</span>
-          </div>
-          <div id="notas-lista"></div>
-          <div class="nota-input-row">
-            <input type="text" id="nota-input" placeholder="Anotar algo sobre este mês... (Enter para salvar)" onkeydown="if(event.key==='Enter')adicionarNota()">
-            <button class="btn btn-primary btn-sm" onclick="adicionarNota()">+ Adicionar</button>
-          </div>
+        <div class="empty">
+          <div class="empty-icon">◈</div>
+          <div class="empty-title">Selecione um mês para planejar o mix semanal</div>
+          <p style="font-size:12px;color:var(--text3);margin-top:4px">4 looks por semana · planejados 1 mês antes · fotografados com antecedência</p>
         </div>
       </div>
     </div>
 
     <div id="page-produtos" class="page">
-      <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
-        <input type="text" id="busca-produto" placeholder="Buscar produto..." style="max-width:260px" oninput="renderCatalogo()">
-        <select id="filtro-genero" onchange="renderCatalogo()" style="max-width:150px">
+      <div style="display:flex;gap:10px;margin-bottom:16px">
+        <input type="text" id="busca-produto" placeholder="Buscar produto..." style="max-width:280px" oninput="renderCatalogo()">
+        <select id="filtro-genero" onchange="renderCatalogo()" style="max-width:160px">
           <option value="">Todos gêneros</option><option>Feminino</option><option>Masculino</option><option>Unissex</option>
         </select>
-        <select id="filtro-tipo" onchange="renderCatalogo()" style="max-width:150px">
+        <select id="filtro-tipo" onchange="renderCatalogo()" style="max-width:160px">
           <option value="">Todas categorias</option><option>Jeans</option><option>Malha</option><option>Natural</option><option>Alfaiataria</option><option>Outro</option>
         </select>
-        <div style="display:flex;gap:6px;margin-left:auto">
-          <button class="btn btn-ghost btn-sm" id="btn-view-cards" onclick="setProdView('cards',this)" style="background:var(--accent);color:#fff">⊞ Cards</button>
-          <button class="btn btn-ghost btn-sm" id="btn-view-lista" onclick="setProdView('lista',this)">≡ Lista</button>
-          <button class="btn btn-primary btn-sm" onclick="openModalProduto()">+ Novo Produto</button>
-        </div>
+        <button class="btn btn-primary btn-sm" style="margin-left:auto" onclick="openModalProduto()">+ Novo Produto</button>
       </div>
-
-      <!-- Indicador de equilíbrio da coleção -->
-      <div id="caixa-equilibrio" class="card" style="margin-bottom:16px;display:none">
-        <div class="card-header">
-          <div>
-            <div class="card-title">✦ Inteligência da Coleção</div>
-            <div class="card-sub" id="eq-sub">Análise automática do mix de produtos</div>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px">
-            <div style="text-align:right">
-              <div style="font-size:28px;font-weight:700;color:var(--accent)" id="eq-score">–</div>
-              <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px" id="eq-label">Equilibrio</div>
-            </div>
-            <svg width="52" height="52" viewBox="0 0 52 52">
-              <circle cx="26" cy="26" r="20" fill="none" stroke="var(--surface2)" stroke-width="6"/>
-              <circle id="eq-arc" cx="26" cy="26" r="20" fill="none" stroke="var(--accent)" stroke-width="6"
-                stroke-dasharray="126" stroke-dashoffset="126" stroke-linecap="round"
-                transform="rotate(-90 26 26)" style="transition:stroke-dashoffset .6s ease"/>
-            </svg>
-          </div>
-        </div>
-        <div id="eq-alertas" style="display:flex;flex-direction:column;gap:6px;padding:0 18px 14px"></div>
-      </div>
-
-      <!-- Vista Cards -->
-      <div id="prod-cards-view">
-        <div id="prod-cards-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px"></div>
-        <div id="prod-cards-empty" class="empty" style="display:none"><div class="empty-icon">◫</div><div class="empty-title">Nenhum produto encontrado</div></div>
-      </div>
-
-      <!-- Vista Lista -->
-      <div id="prod-lista-view" style="display:none">
-        <div class="card">
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>Ref</th><th>Foto</th><th>Produto</th><th>Gênero</th><th>Categoria</th><th>Preço Mín</th><th>Preço Máx</th><th>Status Corte</th><th>Produção</th><th>Status</th><th></th></tr></thead>
-              <tbody id="tbody-catalogo"></tbody>
-            </table>
-          </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Ref</th><th>Produto</th><th>Gênero</th><th>Categoria</th><th>Preço Mín</th><th>Preço Máx</th><th>Status</th><th></th></tr></thead>
+            <tbody id="tbody-catalogo"><tr><td colspan="8"><div class="empty"><div class="empty-icon">◫</div><div class="empty-title">Nenhum produto cadastrado</div></div></td></tr></tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -1122,68 +885,17 @@ tbody tr:hover td { background: #FAFAF8; }
 </div>
 
 <div class="modal-overlay" id="modal-produto">
-  <div class="modal" style="width:560px;max-width:96vw">
+  <div class="modal">
     <div class="modal-title"><span id="modal-prod-title">Novo Produto</span><button class="btn btn-ghost btn-icon" onclick="closeModal('modal-produto')">✕</button></div>
-
-    <!-- Foto do produto -->
-    <div style="display:flex;gap:14px;margin-bottom:14px;align-items:flex-start">
-      <div style="flex-shrink:0">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:5px">Foto do Produto</div>
-        <div class="croqui-upload-area" style="width:100px;height:120px;padding:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative" id="prod-foto-area">
-          <img id="prod-foto-preview" src="" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:4px;position:absolute;inset:0">
-          <div id="prod-foto-placeholder" style="text-align:center;font-size:10px;color:var(--text3)">
-            <div style="font-size:22px;margin-bottom:3px">📷</div>
-            Adicionar foto
-          </div>
-          <input type="file" accept="image/*" onchange="onProdFoto(event)" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%">
-        </div>
-      </div>
-      <div style="flex:1">
-        <div class="form-grid form-grid-2">
-          <div class="form-field"><label class="form-label">Referência</label><input type="text" id="prod-ref" placeholder="ex: 001"></div>
-          <div class="form-field"><label class="form-label">Nome do Produto</label><input type="text" id="prod-nome" placeholder="ex: Calça Jeans Feminina"></div>
-          <div class="form-field"><label class="form-label">Gênero</label><select id="prod-genero"><option>Feminino</option><option>Masculino</option><option>Unissex</option></select></div>
-          <div class="form-field"><label class="form-label">Categoria</label><select id="prod-categoria"><option>Jeans</option><option>Malha</option><option>Natural</option><option>Alfaiataria</option><option>Outro</option></select></div>
-          <div class="form-field"><label class="form-label">Preço Mínimo (R$)</label><input type="number" id="prod-preco-min" placeholder="0,00" step="0.01"></div>
-          <div class="form-field"><label class="form-label">Preço Máximo (R$)</label><input type="number" id="prod-preco-max" placeholder="0,00" step="0.01"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="divider" style="margin:10px 0"></div>
-
-    <!-- Status produção -->
-    <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--text3);margin-bottom:8px">Status de Produção</div>
     <div class="form-grid form-grid-2" style="margin-bottom:12px">
-      <div class="form-field">
-        <label class="form-label">Status do Corte</label>
-        <select id="prod-status-corte">
-          <option value="planejado">Planejado</option>
-          <option value="cortado">Cortado</option>
-          <option value="costurado">Costurado</option>
-          <option value="pronto-foto">Pronto para Foto</option>
-          <option value="fotografado">Fotografado</option>
-          <option value="lancado">Lançado</option>
-        </select>
-      </div>
-      <div class="form-field">
-        <label class="form-label">Produção</label>
-        <select id="prod-producao">
-          <option value="interna">Interna</option>
-          <option value="faccionista">Faccionista</option>
-          <option value="mista">Mista (interno + faccionista)</option>
-        </select>
-      </div>
-      <div class="form-field">
-        <label class="form-label">Faccionista (nome)</label>
-        <input type="text" id="prod-faccionista" placeholder="Nome do faccionista">
-      </div>
-      <div class="form-field">
-        <label class="form-label">Status</label>
-        <select id="prod-status"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select>
-      </div>
+      <div class="form-field"><label class="form-label">Referência</label><input type="text" id="prod-ref" placeholder="ex: 001"></div>
+      <div class="form-field"><label class="form-label">Nome do Produto</label><input type="text" id="prod-nome" placeholder="ex: Calça Jeans Feminina"></div>
+      <div class="form-field"><label class="form-label">Gênero</label><select id="prod-genero"><option>Feminino</option><option>Masculino</option><option>Unissex</option></select></div>
+      <div class="form-field"><label class="form-label">Categoria</label><select id="prod-categoria"><option>Jeans</option><option>Malha</option><option>Natural</option><option>Alfaiataria</option><option>Outro</option></select></div>
+      <div class="form-field"><label class="form-label">Preço Mínimo (R$)</label><input type="number" id="prod-preco-min" placeholder="0,00" step="0.01"></div>
+      <div class="form-field"><label class="form-label">Preço Máximo (R$)</label><input type="number" id="prod-preco-max" placeholder="0,00" step="0.01"></div>
     </div>
-
+    <div class="form-field" style="margin-bottom:12px"><label class="form-label">Status</label><select id="prod-status"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select></div>
     <div class="divider"></div>
     <div style="display:flex;gap:10px;justify-content:flex-end">
       <button class="btn btn-secondary" onclick="closeModal('modal-produto')">Cancelar</button>
@@ -1438,6 +1150,7 @@ function goPage(name, el) {
   el.classList.add('active');
   document.getElementById('topbarTitle').textContent = pageTitles[name][0];
   document.getElementById('topbarSub').textContent = pageTitles[name][1];
+
   if(name==='mensal') renderMeses();
   if(name==='corte') renderCorteMeses();
   if(name==='mixsemanal') renderMixMeses();
@@ -1981,231 +1694,468 @@ async function salvarCorte(){
   notify('Corte salvo com sucesso!','success');
 }
 
-// ── VISTA DE PRODUTOS ────────────────────────────────────────
-let prodView = 'cards';
-function setProdView(v, btn) {
-  prodView = v;
-  document.getElementById('prod-cards-view').style.display = v === 'cards' ? '' : 'none';
-  document.getElementById('prod-lista-view').style.display  = v === 'lista' ? '' : 'none';
-  document.querySelectorAll('#btn-view-cards,#btn-view-lista').forEach(b => {
-    b.style.background = ''; b.style.color = '';
-  });
-  btn.style.background = 'var(--accent)'; btn.style.color = '#fff';
-  renderCatalogo();
+// ========= MIX SEMANAL (novo, completo) =========
+let mixMesSel = null;         // {ano, mes}
+let mixEditando = null;       // {semana: 0-3, k}
+let mixSelTemp = [];          // IDs selecionados temporariamente no modal
+let croquiCtx = null;         // {semana, produtoId, k}
+let croquiDataTemp = null;    // base64 temporário antes de salvar
+const MIX_LIMITE = 6;
+
+function mixChave(ano, mes) { return String(ano) + '-' + String(mes).padStart(2,'0'); }
+
+function getMixDoMes(k) {
+  if (!DB.mix[k]) {
+    DB.mix[k] = {
+      semanas: [
+        { label: 'Mix 1', data: '', produtos: [] }, // [{produtoId, croqui}]
+        { label: 'Mix 2', data: '', produtos: [] },
+        { label: 'Mix 3', data: '', produtos: [] },
+        { label: 'Mix 4', data: '', produtos: [] },
+      ]
+    };
+  }
+  if (!DB.mix[k].semanas) {
+    DB.mix[k].semanas = [
+      {label:'Mix 1',data:'',produtos:[]},{label:'Mix 2',data:'',produtos:[]},
+      {label:'Mix 3',data:'',produtos:[]},{label:'Mix 4',data:'',produtos:[]},
+    ];
+  }
+  DB.mix[k].semanas.forEach(s => { if(!s.produtos) s.produtos = []; });
+  return DB.mix[k];
 }
 
-const STATUS_CORTE_STEPS = ['planejado','cortado','costurado','pronto-foto','fotografado','lancado'];
-const STATUS_CORTE_LABEL = {
-  'planejado':'Planejado','cortado':'Cortado','costurado':'Costurado',
-  'pronto-foto':'Pronto p/ Foto','fotografado':'Fotografado','lancado':'Lançado'
-};
-const PROD_CLASS = {
-  'planejado':'sb-planejado','cortado':'sb-cortado','costurado':'sb-costurado',
-  'pronto-foto':'sb-pronto-foto','fotografado':'sb-fotografado','lancado':'sb-lancado'
-};
-
-function renderCatalogo() {
-  const busca  = document.getElementById('busca-produto')?.value.toLowerCase() || '';
-  const genero = document.getElementById('filtro-genero')?.value || '';
-  const tipo   = document.getElementById('filtro-tipo')?.value || '';
-  const prods  = DB.produtos.filter(p =>
-    (!busca  || p.nome.toLowerCase().includes(busca) || (p.ref||'').toLowerCase().includes(busca)) &&
-    (!genero || p.genero === genero) &&
-    (!tipo   || p.categoria === tipo)
-  );
-
-  // ── Equilíbrio ──
-  renderEquilibrio(DB.produtos.filter(p => p.status === 'ativo'));
-
-  if (prodView === 'cards') {
-    const grid  = document.getElementById('prod-cards-grid');
-    const empty = document.getElementById('prod-cards-empty');
-    if (!grid) return;
-    if (!prods.length) {
-      grid.innerHTML = ''; grid.style.display = 'none';
-      empty.style.display = '';
-      return;
-    }
-    grid.style.display = ''; empty.style.display = 'none';
-    grid.innerHTML = prods.map(p => {
-      const step  = STATUS_CORTE_STEPS.indexOf(p.statusCorte || 'planejado');
-      const badge = PROD_CLASS[p.statusCorte || 'planejado'];
-      const label = STATUS_CORTE_LABEL[p.statusCorte || 'planejado'];
-      const stepsHtml = STATUS_CORTE_STEPS.map((_,i) =>
-        `<div class="status-step ${i < step ? 'done' : i === step ? 'current' : ''}"></div>`
-      ).join('');
-      const prodIcon = p.producao === 'faccionista' ? '🧵' : p.producao === 'mista' ? '🔀' : '🏭';
-      return `
-        <div class="prod-card" onclick="editarProduto(${p.id})">
-          <div class="prod-card-img" style="position:relative">
-            ${p.foto
-              ? `<img src="${p.foto}" alt="${p.nome}">`
-              : `<span style="font-size:40px;opacity:.25">👗</span>`}
-            <span class="prod-card-status-badge ${badge}">${label}</span>
-            <button class="prod-card-menu" onclick="event.stopPropagation();editarProduto(${p.id})" title="Editar">✎</button>
-          </div>
-          <div class="prod-card-body">
-            <div class="prod-card-ref">Ref ${p.ref}</div>
-            <div class="prod-card-nome">${p.nome}</div>
-            <div class="prod-card-cat">${p.categoria} · ${p.genero}</div>
-            <div class="prod-card-preco">R$ ${(p.precoMin||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</div>
-            <div class="prod-card-producao">${prodIcon} ${p.producao === 'faccionista' ? (p.faccionista || 'Faccionista') : p.producao === 'mista' ? 'Mista' : 'Interna'}</div>
-            <div class="status-pipeline">${stepsHtml}</div>
-          </div>
-        </div>`;
-    }).join('');
-
-  } else {
-    const tbody = document.getElementById('tbody-catalogo');
-    if (!tbody) return;
-    if (!prods.length) {
-      tbody.innerHTML = '<tr><td colspan="11"><div class="empty"><div class="empty-icon">◫</div><div class="empty-title">Nenhum produto encontrado</div></div></td></tr>';
-      return;
-    }
-    tbody.innerHTML = prods.map(p => {
-      const badge = PROD_CLASS[p.statusCorte || 'planejado'];
-      const label = STATUS_CORTE_LABEL[p.statusCorte || 'planejado'];
-      const prodIcon = p.producao === 'faccionista' ? '🧵' : p.producao === 'mista' ? '🔀' : '🏭';
-      return `<tr>
-        <td style="color:var(--text3);font-size:12px">${p.ref}</td>
-        <td>${p.foto ? `<img src="${p.foto}" style="width:36px;height:44px;object-fit:cover;border-radius:4px;border:1px solid var(--border)">` : '<span style="color:var(--border);font-size:20px">◻</span>'}</td>
-        <td style="font-weight:500">${p.nome}</td>
-        <td><span class="badge badge-gray">${p.genero}</span></td>
-        <td><span class="badge badge-accent">${p.categoria}</span></td>
-        <td>R$ ${(p.precoMin||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-        <td>R$ ${(p.precoMax||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
-        <td><span class="badge ${badge}" style="font-size:10px">${label}</span></td>
-        <td>${prodIcon} ${p.producao === 'faccionista' ? (p.faccionista||'Faccionista') : p.producao === 'mista' ? 'Mista' : 'Interna'}</td>
-        <td><span class="badge ${p.status==='ativo'?'badge-green':'badge-gray'}">${p.status}</span></td>
-        <td style="white-space:nowrap">
-          <button class="btn btn-ghost btn-sm" onclick="editarProduto(${p.id})">Editar</button>
-          <button class="btn btn-danger btn-sm" onclick="excluirProduto(${p.id})">Excluir</button>
-        </td>
-      </tr>`;
-    }).join('');
-  }
+function getProdutosAlocados(k) {
+  const mix = getMixDoMes(k);
+  const alocados = new Set();
+  mix.semanas.forEach(s => (s.produtos||[]).forEach(p => alocados.add(p.produtoId)));
+  return alocados;
 }
 
-// ── EQUILÍBRIO DA COLEÇÃO ─────────────────────────────────────
-function renderEquilibrio(prods) {
-  const box = document.getElementById('caixa-equilibrio');
-  if (!box || prods.length === 0) { if(box) box.style.display = 'none'; return; }
-  box.style.display = '';
+function renderMixMeses() {
+  const ano = document.getElementById('mix-ano')?.value;
+  const cont = document.getElementById('mix-month-btns');
+  if (!ano || !cont) return;
 
-  const total = prods.length;
-  const porCat = {};
-  prods.forEach(p => { porCat[p.categoria] = (porCat[p.categoria]||0) + 1; });
-  const porGen = { Feminino:0, Masculino:0, Unissex:0 };
-  prods.forEach(p => { porGen[p.genero] = (porGen[p.genero]||0) + 1; });
+  cont.innerHTML = MESES.map((m, i) => {
+    const k = mixChave(ano, i);
+    const mix = DB.mix[k];
+    const tem = mix?.semanas?.some(s => (s.produtos?.length || 0) > 0);
+    const isA = mixMesSel && String(mixMesSel.ano) === String(ano) && mixMesSel.mes === i;
+    return `<div class="month-btn ${isA?'active':''} ${tem&&!isA?'has-data':''}" onclick="selecionarMixMes(${ano},${i},this)">${m}${tem?'<div class="dot"></div>':''}</div>`;
+  }).join('');
+}
 
-  const alertas = [];
-  let score = 100;
+function selecionarMixMes(ano, mes, el) {
+  mixMesSel = { ano, mes };
+  document.querySelectorAll('#mix-month-btns .month-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderMixContent();
+}
 
-  // Regra 1 — mix de gênero
-  const pctMasc = (porGen.Masculino / total) * 100;
-  if (pctMasc < 15) {
-    alertas.push({ tipo:'err', icon:'⚠️', titulo:'Masculino sub-representado', desc:`Apenas ${Math.round(pctMasc)}% das peças são masculinas. Inclua ao menos ${Math.max(1, Math.round(total*0.15) - porGen.Masculino)} referências masculinas.` });
-    score -= 20;
-  } else {
-    alertas.push({ tipo:'ok', icon:'✓', titulo:'Mix de gênero equilibrado', desc:`${Math.round(pctMasc)}% masculino · ${Math.round((porGen.Feminino/total)*100)}% feminino.` });
-  }
+function renderMixContent() {
+  if (!mixMesSel) return;
 
-  // Regra 2 — dominância de categoria
-  Object.entries(porCat).forEach(([cat, qtd]) => {
-    const pct = (qtd/total)*100;
-    if (pct > 40) {
-      alertas.push({ tipo:'warn', icon:'⚡', titulo:`Excesso de ${cat}`, desc:`${cat} representa ${Math.round(pct)}% do mix (ideal até 35%). Considere distribuir melhor.` });
-      score -= 15;
-    }
+  const { ano, mes } = mixMesSel;
+  const k = mixChave(ano, mes);
+  const mix = getMixDoMes(k);
+  const mesNome = MESES_FULL[mes] + ' ' + ano;
+
+  const totalLooks = mix.semanas.reduce((s, sem) => s + (sem.produtos?.length || 0), 0);
+  const totalProd  = DB.produtos.filter(p => p.status === 'ativo').length;
+
+  let html = `
+    <div class="metrics-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+      <div class="metric-card accent">
+        <div class="metric-label">Looks Planejados</div>
+        <div class="metric-value">${totalLooks}</div>
+        <div class="metric-sub">de até ${MIX_LIMITE * 4} possíveis</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Produtos no Catálogo</div>
+        <div class="metric-value">${totalProd}</div>
+        <div class="metric-sub">disponíveis para selecionar</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Mix completos</div>
+        <div class="metric-value">${mix.semanas.filter(s=>(s.produtos?.length||0)>=4).length}</div>
+        <div class="metric-sub">de 4 semanas</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Com croqui</div>
+        <div class="metric-value">${mix.semanas.reduce((s,sem)=>s+(sem.produtos||[]).filter(p=>p.croqui).length,0)}</div>
+        <div class="metric-sub">looks com imagem</div>
+      </div>
+    </div>
+
+    <div class="mix-semanas-grid">
+      ${mix.semanas.map((sem, si) => buildMixSemanaCard(sem, si, k)).join('')}
+    </div>
+
+    ${buildCalendarioVisual(mix, mesNome)}
+
+    <div style="display:flex;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-primary" onclick="salvarMix()">💾 Salvar Mix Semanal</button>
+    </div>
+  `;
+
+  document.getElementById('mix-content').innerHTML = html;
+}
+
+function buildMixSemanaCard(sem, si, k) {
+  const looks = sem.produtos || [];
+  const faltam = Math.max(0, MIX_LIMITE - looks.length);
+
+  let slotsHtml = '';
+  looks.forEach(item => {
+    const prod = DB.produtos.find(p => p.id === item.produtoId);
+    if (!prod) return;
+    const temCroqui = !!item.croqui;
+
+    slotsHtml += `
+      <div class="mix-look-slot" onclick="abrirCroqui(${si},${item.produtoId})">
+        ${temCroqui ? `<img class="mix-look-thumb" src="${item.croqui}" alt="croqui">`
+                    : `<div class="mix-look-thumb-placeholder">👗</div>`}
+        <div class="mix-look-info">
+          <div class="mix-look-nome">${prod.nome}</div>
+          <div class="mix-look-cat">${prod.ref} · ${prod.categoria} · ${prod.genero}</div>
+        </div>
+        <button class="mix-look-remove" title="Remover"
+          onclick="event.stopPropagation();removerProdutoMix(${si},${item.produtoId},'${k}')">✕</button>
+      </div>`;
   });
 
-  // Regra 3 — variedade mínima
-  const numCats = Object.keys(porCat).length;
-  if (numCats < 3) {
-    alertas.push({ tipo:'warn', icon:'📦', titulo:'Poucas categorias', desc:`Apenas ${numCats} categoria${numCats>1?'s':''} no mix. Mais variedade retém mais clientes.` });
-    score -= 10;
-  } else {
-    alertas.push({ tipo:'ok', icon:'✓', titulo:'Boa variedade de categorias', desc:`${numCats} categorias diferentes no mix.` });
-  }
+  for (let i = 0; i < faltam; i++) slotsHtml += `<div class="mix-look-slot empty">+ vaga disponível</div>`;
 
-  // Regra 4 — ticket médio
-  const ticketMedio = prods.reduce((s,p) => s + ((p.precoMin||0)+(p.precoMax||0))/2, 0) / total;
-  if (ticketMedio < 60) {
-    alertas.push({ tipo:'warn', icon:'💰', titulo:'Ticket médio baixo', desc:`R$ ${ticketMedio.toFixed(2)} por peça. Para atingir R$300k com 4.000 peças, o ideal é R$75+.` });
-    score -= 15;
-  } else {
-    alertas.push({ tipo:'ok', icon:'✓', titulo:`Ticket médio: R$ ${ticketMedio.toFixed(2)}`, desc:'Dentro da faixa para atingir as metas.' });
-  }
-
-  score = Math.max(0, Math.min(100, score));
-  const arc  = document.getElementById('eq-arc');
-  const circ = 126;
-  if (arc) arc.style.strokeDashoffset = circ - (circ * score / 100);
-  const scoreEl = document.getElementById('eq-score');
-  if (scoreEl) scoreEl.textContent = score + '%';
-  const labelEl = document.getElementById('eq-label');
-  if (labelEl) labelEl.textContent = score >= 80 ? 'Equilibrada' : score >= 60 ? 'Atenção' : 'Desequilibrada';
-  const subEl = document.getElementById('eq-sub');
-  if (subEl) subEl.textContent = `${total} produtos ativos analisados`;
-
-  const cont = document.getElementById('eq-alertas');
-  if (cont) cont.innerHTML = alertas.map(a =>
-    `<div class="eq-alerta eq-${a.tipo}">
-      <span class="eq-alerta-icon">${a.icon}</span>
-      <div><strong>${a.titulo}</strong>${a.desc}</div>
-    </div>`
-  ).join('');
+  return `
+    <div class="mix-semana-card">
+      <div class="mix-semana-head">
+        <div>
+          <div class="mix-semana-num">${sem.label}</div>
+          <div style="margin-top:3px">
+            <input class="mix-semana-date-input" type="text" placeholder="Data prevista (ex: 05/05)" value="${sem.data||''}"
+              onchange="atualizarDataMix(${si},'${k}',this.value)" style="width:160px">
+          </div>
+        </div>
+        <span class="mix-semana-count">${looks.length} / ${MIX_LIMITE}</span>
+      </div>
+      <div class="mix-semana-body">${slotsHtml}</div>
+      <div class="mix-semana-footer">
+        <button class="btn btn-secondary btn-sm" onclick="abrirModalMix(${si},'${k}')">+ Adicionar looks</button>
+      </div>
+    </div>`;
 }
 
-// ── FOTO DO PRODUTO ───────────────────────────────────────────
-let prodFotoTemp = null;
-function onProdFoto(event) {
-  const file = event.target.files[0];
+function buildCalendarioVisual(mix, mesNome) {
+  const semanas = mix.semanas;
+
+  let html = `
+    <div class="card" style="margin-top:4px">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Calendário de Lançamento — ${mesNome}</div>
+          <div class="card-sub">Visão geral dos 4 mix e seus produtos</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="exportarCalendarioPDF()">⬇ Exportar PDF</button>
+      </div>
+      <div class="mix-calendario-grid">
+        <div class="mix-cal-header" style="font-size:10px;color:rgba(237,234,227,0.5)">Produto</div>
+        ${semanas.map(s => `<div class="mix-cal-header">${s.label}${s.data ? '<br><span style="font-size:9px;font-weight:400;opacity:.7">'+s.data+'</span>' : ''}</div>`).join('')}
+  `;
+
+  const todosIds = new Set();
+  semanas.forEach(s => (s.produtos||[]).forEach(p => todosIds.add(p.produtoId)));
+
+  if (todosIds.size === 0) {
+    html += `<div style="grid-column:1/-1;padding:24px;text-align:center;color:var(--text3);font-size:12px">Nenhum produto adicionado ainda.</div>`;
+  } else {
+    Array.from(todosIds).forEach(pid => {
+      const prod = DB.produtos.find(p => p.id === pid);
+      if (!prod) return;
+
+      html += `<div class="mix-cal-label" title="${prod.nome}">${prod.ref}<br><span style="font-weight:400;font-size:9px;letter-spacing:0">${prod.nome.split(' ').slice(0,2).join(' ')}</span></div>`;
+
+      semanas.forEach(s => {
+        const esta = (s.produtos||[]).find(p => p.produtoId === pid);
+        const temCroqui = !!esta?.croqui;
+        html += `<div class="mix-cal-cell">${esta ? `<div class="mix-cal-item">${temCroqui ? '🖼 ' : '✓ '}<span class="ref-tag">${prod.ref}</span>${prod.categoria}</div>` : ''}</div>`;
+      });
+    });
+  }
+
+  html += `</div></div>`;
+  return html;
+}
+
+function abrirModalMix(semanaIdx, k) {
+  if (getMixDoMes(k).semanas[semanaIdx].produtos.length >= MIX_LIMITE) {
+    notify(`Mix ${semanaIdx+1} já tem ${MIX_LIMITE} looks. Remova um para adicionar outro.`, 'warn');
+    return;
+  }
+
+  mixEditando = { semana: semanaIdx, k };
+  mixSelTemp = getMixDoMes(k).semanas[semanaIdx].produtos.map(p => p.produtoId);
+
+  document.getElementById('modal-mix-titulo').textContent = `Selecionar Produtos — Mix ${semanaIdx + 1}`;
+  document.getElementById('modal-mix-limite').textContent = MIX_LIMITE;
+
+  document.getElementById('mix-busca-prod').value = '';
+  document.getElementById('mix-filtro-gen').value = '';
+  document.getElementById('mix-filtro-cat').value = '';
+
+  renderModalMixProdutos();
+  document.getElementById('modal-mix-produtos').classList.add('open');
+}
+
+function renderModalMixProdutos() {
+  if (!mixEditando || !mixMesSel) return;
+
+  const { semana, k } = mixEditando;
+  const busca = document.getElementById('mix-busca-prod').value.toLowerCase();
+  const gen   = document.getElementById('mix-filtro-gen').value;
+  const cat   = document.getElementById('mix-filtro-cat').value;
+
+  const kMes = chave(mixMesSel.ano, mixMesSel.mes);
+  const itensMes = DB.meses[kMes]?.itens || [];
+  const idsMes = itensMes.length ? new Set(itensMes.map(it => it.produtoId)) : null;
+
+  const alocados = getProdutosAlocados(k);
+  const nestaSemana = new Set(getMixDoMes(k).semanas[semana].produtos.map(p => p.produtoId));
+
+  const prodsBase = DB.produtos.filter(p => p.status === 'ativo');
+  const prods = prodsBase.filter(p => {
+    if (idsMes && !idsMes.has(p.id)) return false;
+    if (gen && p.genero !== gen) return false;
+    if (cat && p.categoria !== cat) return false;
+    if (busca && !p.nome.toLowerCase().includes(busca) && !String(p.ref).toLowerCase().includes(busca)) return false;
+    return true;
+  });
+
+  const lista = prods.length ? prods : prodsBase;
+
+  let html = '';
+  lista.forEach(p => {
+    const jaSelecionado = mixSelTemp.includes(p.id);
+    const jaNoutraMix   = alocados.has(p.id) && !nestaSemana.has(p.id);
+    const item = getMixDoMes(k).semanas[semana].produtos.find(x => x.produtoId === p.id);
+    const temCroqui = !!item?.croqui;
+
+    html += `<div class="mix-prod-card ${jaSelecionado?'selected':''} ${jaNoutraMix?'disabled':''}"
+      onclick="toggleMixProd(${p.id},${MIX_LIMITE})" title="${jaNoutraMix ? 'Já alocado em outro mix' : p.nome}">
+      <div class="mix-prod-thumb-lg">${temCroqui ? `<img src="${item.croqui}" style="width:44px;height:44px;object-fit:cover;border-radius:5px">` : '👗'}</div>
+      <div class="mix-prod-info">
+        <div class="mix-prod-nome">${p.nome}</div>
+        <div class="mix-prod-ref">Ref ${p.ref} ${jaNoutraMix ? '· <span style="color:var(--amber)">outro mix</span>' : ''}</div>
+        <div class="mix-prod-cat">${p.categoria} · ${p.genero}</div>
+      </div>
+    </div>`;
+  });
+
+  if (!html) {
+    html = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3);font-size:12px">Nenhum produto encontrado.<br>Dica: Planeje o mês antes em "Planejar Mês" para filtrar apenas os produtos do período.</div>';
+  }
+
+  document.getElementById('mix-modal-grid').innerHTML = html;
+  document.getElementById('mix-sel-count').textContent = mixSelTemp.length;
+}
+
+function toggleMixProd(prodId, limite) {
+  const idx = mixSelTemp.indexOf(prodId);
+  if (idx >= 0) mixSelTemp.splice(idx, 1);
+  else {
+    if (mixSelTemp.length >= limite) { notify(`Máximo de ${limite} looks por mix atingido.`, 'warn'); return; }
+    mixSelTemp.push(prodId);
+  }
+  renderModalMixProdutos();
+}
+
+function confirmarSelecaoMix() {
+  if (!mixEditando) return;
+  const { semana, k } = mixEditando;
+  const mix = getMixDoMes(k);
+
+  const existentes = mix.semanas[semana].produtos || [];
+  mix.semanas[semana].produtos = mixSelTemp.map(pid => existentes.find(e => e.produtoId === pid) || ({ produtoId: pid, croqui: null }));
+
+  closeModal('modal-mix-produtos');
+  mixEditando = null;
+  mixSelTemp = [];
+  renderMixContent();
+  notify('Looks atualizados! Salve para persistir.', 'warn');
+}
+
+function atualizarDataMix(semanaIdx, k, valor) {
+  const mix = getMixDoMes(k);
+  mix.semanas[semanaIdx].data = valor;
+}
+
+function removerProdutoMix(semanaIdx, produtoId, k) {
+  const mix = getMixDoMes(k);
+  mix.semanas[semanaIdx].produtos = (mix.semanas[semanaIdx].produtos || []).filter(p => p.produtoId !== produtoId);
+  renderMixContent();
+  notify('Look removido. Salve para persistir.', 'warn');
+}
+
+function abrirCroqui(semanaIdx, produtoId) {
+  if (!mixMesSel) return;
+  const k = mixChave(mixMesSel.ano, mixMesSel.mes);
+  const mix = getMixDoMes(k);
+  const item = (mix.semanas[semanaIdx].produtos || []).find(p => p.produtoId === produtoId);
+  const prod = DB.produtos.find(p => p.id === produtoId);
+
+  croquiCtx = { semana: semanaIdx, produtoId, k };
+  croquiDataTemp = item?.croqui || null;
+
+  document.getElementById('modal-croqui-titulo').textContent = prod ? `Croqui — ${prod.nome}` : 'Croqui';
+
+  const img = document.getElementById('croqui-img-preview');
+  const semImg = document.getElementById('croqui-sem-img');
+  const btnRem = document.getElementById('btn-remover-croqui');
+
+  if (item?.croqui) {
+    img.src = item.croqui;
+    img.style.display = 'block';
+    semImg.style.display = 'none';
+    btnRem.style.display = '';
+  } else {
+    img.style.display = 'none';
+    semImg.style.display = '';
+    btnRem.style.display = 'none';
+  }
+
+  document.getElementById('modal-croqui').classList.add('open');
+}
+
+function onCroquiFile(event) {
+  const file = event.target.files?.[0];
   if (!file) return;
-  if (file.size > 4 * 1024 * 1024) { notify('Imagem muito grande (máx 4MB).',''); return; }
+  if (file.size > 4 * 1024 * 1024) { notify('Imagem muito grande (máx 4MB).', 'warn'); return; }
+
   const reader = new FileReader();
   reader.onload = e => {
-    prodFotoTemp = e.target.result;
-    const prev = document.getElementById('prod-foto-preview');
-    const ph   = document.getElementById('prod-foto-placeholder');
-    if (prev) { prev.src = prodFotoTemp; prev.style.display = 'block'; }
-    if (ph)   ph.style.display = 'none';
+    croquiDataTemp = e.target.result;
+    const img = document.getElementById('croqui-img-preview');
+    img.src = croquiDataTemp;
+    img.style.display = 'block';
+    document.getElementById('croqui-sem-img').style.display = 'none';
+    document.getElementById('btn-remover-croqui').style.display = '';
   };
   reader.readAsDataURL(file);
 }
 
+function removerCroqui() {
+  croquiDataTemp = null;
+  document.getElementById('croqui-img-preview').style.display = 'none';
+  document.getElementById('croqui-sem-img').style.display = '';
+  document.getElementById('btn-remover-croqui').style.display = 'none';
+}
+
+function salvarCroqui() {
+  if (!croquiCtx) return;
+  const { semana, produtoId, k } = croquiCtx;
+  const mix = getMixDoMes(k);
+  const item = (mix.semanas[semana].produtos || []).find(p => p.produtoId === produtoId);
+  if (item) item.croqui = croquiDataTemp;
+
+  closeModal('modal-croqui');
+  croquiCtx = null;
+  renderMixContent();
+  notify('Croqui salvo! Clique em "Salvar Mix Semanal" para persistir.', 'warn');
+}
+
+async function salvarMix() {
+  if (!mixMesSel) return;
+  const k = mixChave(mixMesSel.ano, mixMesSel.mes);
+
+  saveDB();
+  notify('Salvando...', 'warn');
+
+  try {
+    await fbSaveMix(k);
+    notify('Mix semanal salvo!', 'success');
+    renderMixMeses();
+  } catch (e) {
+    notify('Salvo localmente (erro Firebase).', 'warn');
+  }
+}
+
+function exportarCalendarioPDF() {
+  if (!mixMesSel) return;
+  if (!window.jspdf?.jsPDF) { notify('PDF não disponível.', 'warn'); return; }
+
+  const k = mixChave(mixMesSel.ano, mixMesSel.mes);
+  const mix = getMixDoMes(k);
+  const mesNome = MESES_FULL[mixMesSel.mes] + ' ' + mixMesSel.ano;
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+
+  doc.setFont('helvetica','bold'); doc.setFontSize(14);
+  doc.text('GUGE — Mix Semanal: ' + mesNome, 14, 12);
+
+  const head = [['Produto','Ref','Categoria','Gênero','Mix 1','Mix 2','Mix 3','Mix 4']];
+  const allIds = new Set();
+  mix.semanas.forEach(s => (s.produtos||[]).forEach(p => allIds.add(p.produtoId)));
+
+  const body = [];
+  Array.from(allIds).forEach(pid => {
+    const prod = DB.produtos.find(p => p.id === pid);
+    if (!prod) return;
+    body.push([
+      prod.nome, prod.ref, prod.categoria, prod.genero,
+      ...mix.semanas.map(s => (s.produtos||[]).some(p => p.produtoId === pid) ? ('✓ ' + (s.data || '')) : '—')
+    ]);
+  });
+
+  if (!body.length) { notify('Nenhum produto no mix para exportar.', 'warn'); return; }
+
+  doc.autoTable({ head, body, startY:18, styles:{fontSize:9,cellPadding:2}, headStyles:{fillColor:[27,58,107],textColor:255} });
+  doc.save(`guge_mix_${mixMesSel.ano}-${String(mixMesSel.mes).padStart(2,'0')}.pdf`);
+  notify('PDF exportado!','success');
+}
+
+// ========= CATÁLOGO / METAS / HISTÓRICO / ANUAL / CRONOGRAMA =========
+function renderCatalogo() {
+  const busca = document.getElementById('busca-produto')?.value.toLowerCase()||'';
+  const genero = document.getElementById('filtro-genero')?.value||'';
+  const tipo = document.getElementById('filtro-tipo')?.value||'';
+  const prods = DB.produtos.filter(p => (!busca || p.nome.toLowerCase().includes(busca) || p.ref.toLowerCase().includes(busca)) && (!genero || p.genero===genero) && (!tipo || p.categoria===tipo));
+  const tbody = document.getElementById('tbody-catalogo');
+  if(!tbody) return;
+  if(!prods.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty"><div class="empty-icon">◫</div><div class="empty-title">Nenhum produto encontrado</div></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = prods.map(p => `
+    <tr>
+      <td style="color:var(--text3);font-size:12px">${p.ref}</td>
+      <td style="font-weight:500">${p.nome}</td>
+      <td><span class="badge badge-gray">${p.genero}</span></td>
+      <td><span class="badge badge-accent">${p.categoria}</span></td>
+      <td>R$ ${(p.precoMin||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+      <td>R$ ${(p.precoMax||0).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td>
+      <td><span class="badge ${p.status==='ativo'?'badge-green':'badge-gray'}">${p.status}</span></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="editarProduto(${p.id})">Editar</button><button class="btn btn-danger btn-sm" onclick="excluirProduto(${p.id})">Excluir</button></td>
+    </tr>`).join('');
+}
 
 function openModalProduto(id=null) {
   editProdId = id;
-  prodFotoTemp = null;
   document.getElementById('modal-prod-title').textContent = id ? 'Editar Produto' : 'Novo Produto';
-  const prev = document.getElementById('prod-foto-preview');
-  const ph   = document.getElementById('prod-foto-placeholder');
-  if (id) {
+  if(id) {
     const p = DB.produtos.find(x=>x.id===id);
-    document.getElementById('prod-ref').value       = p.ref;
-    document.getElementById('prod-nome').value      = p.nome;
-    document.getElementById('prod-genero').value    = p.genero;
+    document.getElementById('prod-ref').value = p.ref;
+    document.getElementById('prod-nome').value = p.nome;
+    document.getElementById('prod-genero').value = p.genero;
     document.getElementById('prod-categoria').value = p.categoria;
-    document.getElementById('prod-preco-min').value = p.precoMin||'';
-    document.getElementById('prod-preco-max').value = p.precoMax||'';
-    document.getElementById('prod-status').value    = p.status||'ativo';
-    document.getElementById('prod-status-corte').value = p.statusCorte||'planejado';
-    document.getElementById('prod-producao').value  = p.producao||'interna';
-    document.getElementById('prod-faccionista').value = p.faccionista||'';
-    if (p.foto && prev && ph) {
-      prodFotoTemp = p.foto;
-      prev.src = p.foto; prev.style.display = 'block'; ph.style.display = 'none';
-    } else if (prev && ph) {
-      prev.style.display = 'none'; ph.style.display = ''; prev.src = '';
-    }
+    document.getElementById('prod-preco-min').value = p.precoMin;
+    document.getElementById('prod-preco-max').value = p.precoMax;
+    document.getElementById('prod-status').value = p.status;
   } else {
-    ['prod-ref','prod-nome','prod-preco-min','prod-preco-max','prod-faccionista'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
-    document.getElementById('prod-status').value = 'ativo';
-    document.getElementById('prod-status-corte').value = 'planejado';
-    document.getElementById('prod-producao').value = 'interna';
-    if (prev && ph) { prev.style.display = 'none'; ph.style.display = ''; prev.src = ''; }
-    prodFotoTemp = null;
+    ['prod-ref','prod-nome','prod-preco-min','prod-preco-max'].forEach(id2 => document.getElementById(id2).value='');
+    document.getElementById('prod-genero').selectedIndex=0;
+    document.getElementById('prod-categoria').selectedIndex=0;
+    document.getElementById('prod-status').value='ativo';
   }
   document.getElementById('modal-produto').classList.add('open');
 }
@@ -2229,23 +2179,16 @@ async function salvarProduto() {
     categoria: document.getElementById('prod-categoria').value,
     precoMin: parseFloat(document.getElementById('prod-preco-min').value)||0,
     precoMax: parseFloat(document.getElementById('prod-preco-max').value)||0,
-    status: document.getElementById('prod-status').value,
-    statusCorte: document.getElementById('prod-status-corte').value || 'planejado',
-    producao: document.getElementById('prod-producao').value || 'interna',
-    faccionista: document.getElementById('prod-faccionista').value.trim(),
-    foto: prodFotoTemp || null,
+    status: document.getElementById('prod-status').value
   };
   if(editProdId) {
     const idx = DB.produtos.findIndex(p=>p.id===editProdId);
     DB.produtos[idx] = {...DB.produtos[idx], ...obj};
-  } else {
-    DB.produtos.push({...obj, id: DB.nextId++});
-  }
+  } else DB.produtos.push({...obj, id: DB.nextId++});
   saveDB();
   notify('Salvando...','');
   await fbSaveProdutos();
   closeModal('modal-produto');
-  prodFotoTemp = null;
   renderCatalogo();
   renderDashboard();
   notify(editProdId?'Produto atualizado!':'Produto cadastrado!','success');
@@ -2398,6 +2341,7 @@ function notify(msg, type='success') {
   setTimeout(() => el.classList.remove('show'), 2500);
 }
 
+// Export PDF mensal (como no principal)
 function exportarDados() {
   if (!window.jspdf || !window.jspdf.jsPDF || typeof window.jspdf.jsPDF !== 'function') {
     notify('Biblioteca de PDF não carregada.', 'warn');
@@ -2521,534 +2465,58 @@ async function init() {
   renderCatalogo();
 }
 
-// ═══════════════════════════════════════════════════════════
-// MIX SEMANAL — lógica completa
-// ═══════════════════════════════════════════════════════════
-
-let mixMesSel = null;         // {ano, mes}
-let mixEditando = null;       // {semana: 0-3} — qual semana está sendo editada no modal
-let mixSelTemp = [];          // IDs selecionados temporariamente no modal
-let croquiCtx = null;         // {semana, produtoId} — contexto do modal de croqui
-let croquiDataTemp = null;    // base64 temporário antes de salvar
-
-const MIX_LIMITE = 6; // max looks por semana
-
-function mixChave(ano, mes) { return String(ano) + '-' + String(mes).padStart(2,'0'); }
-
-function getMixDoMes(k) {
-  if (!DB.mix[k]) {
-    DB.mix[k] = {
-      semanas: [
-        { label: 'Mix 1', data: '', produtos: [] }, // produtos = [{produtoId, croqui: base64|null}]
-        { label: 'Mix 2', data: '', produtos: [] },
-        { label: 'Mix 3', data: '', produtos: [] },
-        { label: 'Mix 4', data: '', produtos: [] },
-      ]
-    };
-  }
-  // garante estrutura caso venha incompleto do Firebase
-  if (!DB.mix[k].semanas) DB.mix[k].semanas = [
-    {label:'Mix 1',data:'',produtos:[]},{label:'Mix 2',data:'',produtos:[]},
-    {label:'Mix 3',data:'',produtos:[]},{label:'Mix 4',data:'',produtos:[]},
-  ];
-  DB.mix[k].semanas.forEach(s => { if(!s.produtos) s.produtos = []; });
-  return DB.mix[k];
-}
-
-// Retorna todos os produtoIds já alocados no mês (em qualquer semana)
-function getProdutosAlocados(k) {
-  const mix = getMixDoMes(k);
-  const alocados = new Set();
-  mix.semanas.forEach(s => s.produtos.forEach(p => alocados.add(p.produtoId)));
-  return alocados;
-}
-
-// ─── Render meses ───────────────────────────────────────────
-function renderMixMeses() {
-  const ano = document.getElementById('mix-ano').value;
-  const cont = document.getElementById('mix-month-btns');
-  if (!cont) return;
-  cont.innerHTML = MESES.map((m, i) => {
-    const k = mixChave(ano, i);
-    const mix = DB.mix[k];
-    const tem = mix && mix.semanas && mix.semanas.some(s => s.produtos.length > 0);
-    const isA = mixMesSel && mixMesSel.ano == ano && mixMesSel.mes == i;
-    return `<div class="month-btn ${isA?'active':''} ${tem&&!isA?'has-data':''}" onclick="selecionarMixMes(${ano},${i},this)">${m}${tem?'<div class="dot"></div>':''}</div>`;
-  }).join('');
-}
-
-function selecionarMixMes(ano, mes, el) {
-  mixMesSel = { ano, mes };
-  document.querySelectorAll('#mix-month-btns .month-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  const notasBox = document.getElementById('mix-notas-box');
-  if (notasBox) notasBox.style.display = '';
-  renderMixContent();
-  renderNotas();
-}
-
-// ─── Render conteúdo principal ──────────────────────────────
-function renderMixContent() {
-  if (!mixMesSel) return;
-  const { ano, mes } = mixMesSel;
-  const k = mixChave(ano, mes);
-  const mix = getMixDoMes(k);
-  const mesNome = MESES_FULL[mes] + ' ' + ano;
-
-  // Conta totais
-  const totalLooks = mix.semanas.reduce((s, sem) => s + sem.produtos.length, 0);
-  const totalProd  = DB.produtos.filter(p => p.status === 'ativo').length;
-
-  let html = `
-    <div class="metrics-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
-      <div class="metric-card accent">
-        <div class="metric-label">Looks Planejados</div>
-        <div class="metric-value">${totalLooks}</div>
-        <div class="metric-sub">de até ${MIX_LIMITE * 4} possíveis</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Produtos no Catálogo</div>
-        <div class="metric-value">${totalProd}</div>
-        <div class="metric-sub">disponíveis para selecionar</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Mix completos</div>
-        <div class="metric-value">${mix.semanas.filter(s=>s.produtos.length>=4).length}</div>
-        <div class="metric-sub">de 4 semanas</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Com croqui</div>
-        <div class="metric-value">${mix.semanas.reduce((s,sem)=>s+sem.produtos.filter(p=>p.croqui).length,0)}</div>
-        <div class="metric-sub">looks com imagem</div>
-      </div>
-    </div>`;
-
-  // 4 colunas de mix
-  html += `<div class="mix-semanas-grid">`;
-  mix.semanas.forEach((sem, si) => {
-    html += buildMixSemanaCard(sem, si, k);
-  });
-  html += `</div>`;
-
-  // Calendário visual
-  html += buildCalendarioVisual(mix, mesNome);
-
-  // Botão salvar
-  html += `<div style="display:flex;justify-content:flex-end;margin-top:16px">
-    <button class="btn btn-primary" onclick="salvarMix()">💾 Salvar Mix Semanal</button>
-  </div>`;
-
-  document.getElementById('mix-content').innerHTML = html;
-}
-
-function buildMixSemanaCard(sem, si, k) {
-  const looks = sem.produtos;
-  const faltam = MIX_LIMITE - looks.length;
-
-  // Thumb strip — fotos dos looks com croqui
-  let thumbsHtml = '<div class="mix-thumb-strip">';
-  looks.forEach(item => {
-    const prod = DB.produtos.find(p => p.id === item.produtoId);
-    if (!prod) return;
-    const imgSrc = item.croqui || prod.foto || null;
-    thumbsHtml += `<div class="mix-thumb" title="${prod.nome}" onclick="abrirCroqui(${si},${item.produtoId})">
-      ${imgSrc ? `<img src="${imgSrc}" alt="${prod.nome}">` : '👗'}
-    </div>`;
-  });
-  for (let i = 0; i < faltam; i++) {
-    thumbsHtml += `<div class="mix-thumb" style="border-style:dashed;opacity:.4;cursor:pointer" onclick="abrirModalMix(${si},'${k}')">+</div>`;
-  }
-  thumbsHtml += '</div>';
-
-  // Lista detalhada
-  let listaHtml = '';
-  looks.forEach((item) => {
-    const prod = DB.produtos.find(p => p.id === item.produtoId);
-    if (!prod) return;
-    const imgSrc = item.croqui || prod.foto || null;
-    const step   = STATUS_CORTE_STEPS.indexOf(prod.statusCorte || 'planejado');
-    const badge  = PROD_CLASS[prod.statusCorte || 'planejado'];
-    const label  = STATUS_CORTE_LABEL[prod.statusCorte || 'planejado'];
-    listaHtml += `
-      <div class="mix-look-row">
-        <div class="mix-thumb" style="width:36px;height:44px;cursor:pointer;flex-shrink:0" onclick="abrirCroqui(${si},${item.produtoId})">
-          ${imgSrc ? `<img src="${imgSrc}" alt="${prod.nome}">` : '👗'}
-        </div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${prod.nome}</div>
-          <div style="font-size:10px;color:var(--text3)">${prod.ref} · ${prod.categoria}</div>
-          <span class="badge ${badge}" style="font-size:9px;padding:2px 6px;margin-top:2px;display:inline-block">${label}</span>
-        </div>
-        <button class="mix-look-remove" style="opacity:1" title="Remover" onclick="removerProdutoMix(${si},${item.produtoId},'${k}')">✕</button>
-      </div>`;
-  });
-
-  return `
-    <div class="mix-semana-card-v2">
-      <div class="mix-semana-head-v2">
-        <div>
-          <div class="mix-semana-label">${sem.label}</div>
-          <div class="mix-semana-date">
-            <input class="mix-semana-date-input" type="text" placeholder="Data prevista (ex: 05/05)" value="${sem.data||''}"
-              onchange="atualizarDataMix(${si},'${k}',this.value)" style="width:170px">
-          </div>
-        </div>
-        <span class="mix-semana-count" style="font-size:12px;color:var(--text3)">${looks.length} / ${MIX_LIMITE}</span>
-      </div>
-      <div style="padding:10px 14px 4px">${thumbsHtml}</div>
-      <div style="padding:0 14px 10px">${listaHtml || '<div style="font-size:11px;color:var(--text3);text-align:center;padding:10px 0">Nenhum look adicionado</div>'}</div>
-      <div style="padding:8px 14px 12px;border-top:1px solid var(--border)">
-        <button class="btn btn-secondary btn-sm" style="width:100%;justify-content:center" onclick="abrirModalMix(${si},'${k}')">+ Adicionar looks</button>
-      </div>
-    </div>`;
-}
-
-function buildCalendarioVisual(mix, mesNome) {
-  const semanas = mix.semanas;
-  let html = `
-    <div class="card" style="margin-top:4px">
-      <div class="card-header">
-        <div>
-          <div class="card-title">Calendário de Lançamento — ${mesNome}</div>
-          <div class="card-sub">Visão geral dos 4 mix e seus produtos</div>
-        </div>
-        <button class="btn btn-secondary btn-sm" onclick="exportarCalendarioPDF()">⬇ Exportar PDF</button>
-      </div>
-      <div class="mix-calendario-grid">
-        <div class="mix-cal-header" style="font-size:10px;color:rgba(237,234,227,0.5)">Produto</div>`;
-  semanas.forEach(s => {
-    html += `<div class="mix-cal-header">${s.label}${s.data ? '<br><span style="font-size:9px;font-weight:400;opacity:.7">'+s.data+'</span>' : ''}</div>`;
-  });
-
-  // Linha por produto (todos que aparecem em pelo menos 1 mix)
-  const todosIds = new Set();
-  semanas.forEach(s => s.produtos.forEach(p => todosIds.add(p.produtoId)));
-
-  if (todosIds.size === 0) {
-    html += `<div style="grid-column:1/-1;padding:24px;text-align:center;color:var(--text3);font-size:12px">Nenhum produto adicionado ainda.</div>`;
-  } else {
-    todosIds.forEach(pid => {
-      const prod = DB.produtos.find(p => p.id === pid);
-      if (!prod) return;
-      html += `<div class="mix-cal-label" title="${prod.nome}">${prod.ref}<br><span style="font-weight:400;font-size:9px;letter-spacing:0">${prod.nome.split(' ').slice(0,2).join(' ')}</span></div>`;
-      semanas.forEach(s => {
-        const esta = s.produtos.find(p => p.produtoId === pid);
-        const temCroqui = esta && esta.croqui;
-        html += `<div class="mix-cal-cell">`;
-        if (esta) {
-          html += `<div class="mix-cal-item">${temCroqui ? '🖼 ' : '✓ '}<span class="ref-tag">${prod.ref}</span>${prod.categoria}</div>`;
-        }
-        html += `</div>`;
-      });
-    });
-  }
-
-  html += `</div></div>`;
-  return html;
-}
-
-// ─── Modal: selecionar produtos ─────────────────────────────
-function abrirModalMix(semanaIdx, k) {
-  if (getMixDoMes(k).semanas[semanaIdx].produtos.length >= MIX_LIMITE) {
-    notify(`Mix ${semanaIdx+1} já tem ${MIX_LIMITE} looks. Remova um para adicionar outro.`, '');
-    return;
-  }
-  mixEditando = { semana: semanaIdx, k };
-  // Pré-seleciona os que já estão nesta semana
-  mixSelTemp = getMixDoMes(k).semanas[semanaIdx].produtos.map(p => p.produtoId);
-  document.getElementById('modal-mix-titulo').textContent = `Selecionar Produtos — Mix ${semanaIdx + 1}`;
-  document.getElementById('modal-mix-limite').textContent = MIX_LIMITE;
-  document.getElementById('mix-busca-prod').value = '';
-  document.getElementById('mix-filtro-gen').value = '';
-  document.getElementById('mix-filtro-cat').value = '';
-  renderModalMixProdutos();
-  document.getElementById('modal-mix-produtos').classList.add('open');
-}
-
-function renderModalMixProdutos() {
-  if (!mixEditando) return;
-  const { semana, k } = mixEditando;
-  const busca = document.getElementById('mix-busca-prod').value.toLowerCase();
-  const gen   = document.getElementById('mix-filtro-gen').value;
-  const cat   = document.getElementById('mix-filtro-cat').value;
-
-  // Produtos ativos do mês — se o mês tiver itens planejados, filtra por eles; senão mostra todos ativos
-  const kMes = chave(mixMesSel.ano, mixMesSel.mes);
-  const itensMes = DB.meses[kMes]?.itens || [];
-  const idsMes = itensMes.length > 0 ? new Set(itensMes.map(it => it.produtoId)) : null;
-
-  const alocados = getProdutosAlocados(k);
-  // Produtos já nesta semana (podem ser clicados para desmarcar)
-  const nestaSemana = new Set(getMixDoMes(k).semanas[semana].produtos.map(p => p.produtoId));
-
-  let prods = DB.produtos.filter(p => {
-    if (p.status !== 'ativo') return false;
-    if (idsMes && !idsMes.has(p.id)) return false; // só do mês planejado
-    if (gen && p.genero !== gen) return false;
-    if (cat && p.categoria !== cat) return false;
-    if (busca && !p.nome.toLowerCase().includes(busca) && !p.ref.includes(busca)) return false;
-    return true;
-  });
-
-  // Se mês não tem planejamento, mostra todos ativos
-  if (idsMes && prods.length === 0 && itensMes.length === 0) {
-    prods = DB.produtos.filter(p => p.status === 'ativo');
-  }
-
-  const limite = MIX_LIMITE;
-  let html = '';
-  prods.forEach(p => {
-    const jaSelecionado = mixSelTemp.includes(p.id);
-    const jaNoutraMix   = alocados.has(p.id) && !nestaSemana.has(p.id);
-    const item = getMixDoMes(k).semanas[semana].produtos.find(x => x.produtoId === p.id);
-    const temCroqui = item && item.croqui;
-
-    html += `<div class="mix-prod-card ${jaSelecionado?'selected':''} ${jaNoutraMix?'disabled':''}"
-      onclick="toggleMixProd(${p.id},${limite})"
-      title="${jaNoutraMix ? 'Já alocado em outro mix' : p.nome}">
-      <div class="mix-prod-thumb-lg">${temCroqui ? `<img src="${item.croqui}" style="width:44px;height:44px;object-fit:cover;border-radius:5px">` : '👗'}</div>
-      <div class="mix-prod-info">
-        <div class="mix-prod-nome">${p.nome}</div>
-        <div class="mix-prod-ref">Ref ${p.ref} ${jaNoutraMix ? '· <span style="color:var(--amber)">outro mix</span>' : ''}</div>
-        <div class="mix-prod-cat">${p.categoria} · ${p.genero}</div>
-      </div>
-    </div>`;
-  });
-
-  if (!html) html = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text3);font-size:12px">Nenhum produto encontrado.<br>Dica: Planeje o mês antes em "Planejar Mês" para filtrar apenas os produtos do período.</div>';
-
-  document.getElementById('mix-modal-grid').innerHTML = html;
-  document.getElementById('mix-sel-count').textContent = mixSelTemp.length;
-}
-
-function toggleMixProd(prodId, limite) {
-  const idx = mixSelTemp.indexOf(prodId);
-  if (idx >= 0) {
-    mixSelTemp.splice(idx, 1);
-  } else {
-    if (mixSelTemp.length >= limite) {
-      notify(`Máximo de ${limite} looks por mix atingido.`, '');
-      return;
-    }
-    mixSelTemp.push(prodId);
-  }
-  renderModalMixProdutos();
-}
-
-function confirmarSelecaoMix() {
-  if (!mixEditando) return;
-  const { semana, k } = mixEditando;
-  const mix = getMixDoMes(k);
-  // Mantém croquis existentes, adiciona novos sem croqui
-  const existentes = mix.semanas[semana].produtos;
-  mix.semanas[semana].produtos = mixSelTemp.map(pid => {
-    const ex = existentes.find(e => e.produtoId === pid);
-    return ex || { produtoId: pid, croqui: null };
-  });
-  closeModal('modal-mix-produtos');
-  mixEditando = null;
-  mixSelTemp = [];
-  renderMixContent();
-  notify('Looks atualizados! Salve para persistir.', '');
-}
-
-// ─── Data do mix ────────────────────────────────────────────
-function atualizarDataMix(semanaIdx, k, valor) {
-  const mix = getMixDoMes(k);
-  mix.semanas[semanaIdx].data = valor;
-}
-
-// ─── Remover produto do mix ─────────────────────────────────
-function removerProdutoMix(semanaIdx, produtoId, k) {
-  const mix = getMixDoMes(k);
-  mix.semanas[semanaIdx].produtos = mix.semanas[semanaIdx].produtos.filter(p => p.produtoId !== produtoId);
-  renderMixContent();
-  notify('Look removido. Salve para persistir.', '');
-}
-
-// ─── Croqui ─────────────────────────────────────────────────
-function abrirCroqui(semanaIdx, produtoId) {
-  if (!mixMesSel) return;
-  const k = mixChave(mixMesSel.ano, mixMesSel.mes);
-  const mix = getMixDoMes(k);
-  const item = mix.semanas[semanaIdx].produtos.find(p => p.produtoId === produtoId);
-  const prod = DB.produtos.find(p => p.id === produtoId);
-  croquiCtx = { semana: semanaIdx, produtoId, k };
-  croquiDataTemp = item?.croqui || null;
-
-  document.getElementById('modal-croqui-titulo').textContent = prod ? `Croqui — ${prod.nome}` : 'Croqui';
-  const img = document.getElementById('croqui-img-preview');
-  const semImg = document.getElementById('croqui-sem-img');
-  const btnRem = document.getElementById('btn-remover-croqui');
-  if (item?.croqui) {
-    img.src = item.croqui;
-    img.style.display = 'block';
-    semImg.style.display = 'none';
-    btnRem.style.display = '';
-  } else {
-    img.style.display = 'none';
-    semImg.style.display = '';
-    btnRem.style.display = 'none';
-  }
-  document.getElementById('modal-croqui').classList.add('open');
-}
-
-function onCroquiFile(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  if (file.size > 4 * 1024 * 1024) { notify('Imagem muito grande (máx 4MB).', ''); return; }
-  const reader = new FileReader();
-  reader.onload = e => {
-    croquiDataTemp = e.target.result;
-    const img = document.getElementById('croqui-img-preview');
-    img.src = croquiDataTemp;
-    img.style.display = 'block';
-    document.getElementById('croqui-sem-img').style.display = 'none';
-    document.getElementById('btn-remover-croqui').style.display = '';
-  };
-  reader.readAsDataURL(file);
-}
-
-function removerCroqui() {
-  croquiDataTemp = null;
-  document.getElementById('croqui-img-preview').style.display = 'none';
-  document.getElementById('croqui-sem-img').style.display = '';
-  document.getElementById('btn-remover-croqui').style.display = 'none';
-}
-
-function salvarCroqui() {
-  if (!croquiCtx) return;
-  const { semana, produtoId, k } = croquiCtx;
-  const mix = getMixDoMes(k);
-  const item = mix.semanas[semana].produtos.find(p => p.produtoId === produtoId);
-  if (item) item.croqui = croquiDataTemp;
-  closeModal('modal-croqui');
-  croquiCtx = null;
-  renderMixContent();
-  notify('Croqui salvo! Clique em "Salvar Mix Semanal" para persistir.', '');
-}
-
-// ─── Salvar ─────────────────────────────────────────────────
-async function salvarMix() {
-  if (!mixMesSel) return;
-  const k = mixChave(mixMesSel.ano, mixMesSel.mes);
-  saveDB();
-  notify('Salvando...', '');
-  try {
-    await fbSaveMix(k);
-    notify('Mix semanal salvo!', 'success');
-    renderMixMeses();
-  } catch(e) {
-    notify('Salvo localmente (erro Firebase).', '');
-  }
-}
-
-// ─── Export PDF ──────────────────────────────────────────────
-function exportarCalendarioPDF() {
-  if (!mixMesSel) return;
-  if (!window.jspdf?.jsPDF) { notify('PDF não disponível.', ''); return; }
-  const k = mixChave(mixMesSel.ano, mixMesSel.mes);
-  const mix = getMixDoMes(k);
-  const mesNome = MESES_FULL[mixMesSel.mes] + ' ' + mixMesSel.ano;
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-  doc.setFont('helvetica','bold'); doc.setFontSize(14);
-  doc.text('GUGE — Mix Semanal: ' + mesNome, 14, 12);
-  const head = [['Produto','Ref','Categoria','Gênero','Mix 1','Mix 2','Mix 3','Mix 4']];
-  const allIds = new Set(); mix.semanas.forEach(s => s.produtos.forEach(p => allIds.add(p.produtoId)));
-  const body = [];
-  allIds.forEach(pid => {
-    const prod = DB.produtos.find(p => p.id === pid);
-    if (!prod) return;
-    body.push([
-      prod.nome, prod.ref, prod.categoria, prod.genero,
-      ...mix.semanas.map(s => s.produtos.find(p => p.produtoId === pid) ? '✓ '+s.data : '—')
-    ]);
-  });
-  if (!body.length) { notify('Nenhum produto no mix para exportar.',''); return; }
-  doc.autoTable({ head, body, startY:18, styles:{fontSize:9,cellPadding:2}, headStyles:{fillColor:[27,58,107],textColor:255} });
-  doc.save(`guge_mix_${mixMesSel.ano}-${String(mixMesSel.mes).padStart(2,'0')}.pdf`);
-  notify('PDF exportado!','success');
-}
-
-// ── ANOTAÇÕES RÁPIDAS ─────────────────────────────────────────
-function getNotasKey() {
-  if (!mixMesSel) return null;
-  return 'notas-' + mixChave(mixMesSel.ano, mixMesSel.mes);
-}
-function getNotas() {
-  const k = getNotasKey();
-  if (!k) return [];
-  if (!DB.mix[k]) DB.mix[k] = { notas: [] };
-  if (!DB.mix[k].notas) DB.mix[k].notas = [];
-  return DB.mix[k].notas;
-}
-function renderNotas() {
-  const lista = document.getElementById('notas-lista');
-  if (!lista) return;
-  const notas = getNotas();
-  if (!notas.length) {
-    lista.innerHTML = '<div style="font-size:12px;color:var(--text3);padding:4px 0 8px">Nenhuma anotação ainda.</div>';
-    return;
-  }
-  lista.innerHTML = notas.map((n, i) => `
-    <div class="nota-item">
-      <span style="color:var(--accent);font-size:12px;flex-shrink:0">•</span>
-      <span style="flex:1">${n.texto}</span>
-      <span style="font-size:10px;color:var(--text3);white-space:nowrap">${n.data||''}</span>
-      <button onclick="removerNota(${i})" title="Remover">✕</button>
-    </div>`).join('');
-}
-function adicionarNota() {
-  const input = document.getElementById('nota-input');
-  if (!input || !input.value.trim()) return;
-  const notas = getNotas();
-  const k = getNotasKey();
-  const hoje = new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
-  notas.push({ texto: input.value.trim(), data: hoje });
-  DB.mix[k].notas = notas;
-  input.value = '';
-  saveDB();
-  fbSaveMix(k);
-  renderNotas();
-}
-function removerNota(i) {
-  const notas = getNotas();
-  const k = getNotasKey();
-  notas.splice(i, 1);
-  DB.mix[k].notas = notas;
-  saveDB();
-  fbSaveMix(k);
-  renderNotas();
-}
-
 Object.assign(window, {
-  // navegação
   goPage,
-  // mês
-  selecionarMes, renderMeses, adicionarItemMes, removerItemMes,
-  salvarMes, limparMes, preencherPreco, calcAddTotal, distGradeAdd, syncGrade,
-  // produtos
-  openModalProduto, editarProduto, excluirProduto, salvarProduto,
-  renderCatalogo, setProdView, onProdFoto, renderEquilibrio,
-  // metas
-  openModalMeta, salvarMeta,
-  // histórico / anual / cronograma
-  renderHistorico, irParaMes, renderAnual, switchAnualTab,
-  renderCronograma, toggleCron, salvarCronograma,
+  selecionarMes,
+  renderMeses,
+  adicionarItemMes,
+  removerItemMes,
+  salvarMes,
+  limparMes,
+  preencherPreco,
+  calcAddTotal,
+  distGradeAdd,
+  syncGrade,
+  openModalProduto,
+  editarProduto,
+  excluirProduto,
+  salvarProduto,
+  renderCatalogo,
+  openModalMeta,
+  salvarMeta,
+  renderHistorico,
+  irParaMes,
+  renderAnual,
+  switchAnualTab,
+  renderCronograma,
+  toggleCron,
+  salvarCronograma,
+  closeModal,
+  exportarDados,
   // corte
-  renderCorteMeses, selecionarCorte, switchCorteTab,
-  calcCorteTotal, atualizarCorteCalc, adicionarCorteRef, removerCorteRef, salvarCorte,
-  // mix semanal
-  renderMixMeses, selecionarMixMes, renderMixContent,
-  abrirModalMix, renderModalMixProdutos, toggleMixProd, confirmarSelecaoMix,
-  atualizarDataMix, removerProdutoMix,
-  abrirCroqui, onCroquiFile, removerCroqui, salvarCroqui,
-  salvarMix, exportarCalendarioPDF,
-  // anotações
-  adicionarNota, removerNota,
-  // utilitários
-  closeModal, exportarDados,
+  renderCorteMeses,
+  selecionarCorte,
+  switchCorteTab,
+  calcCorteTotal,
+  atualizarCorteCalc,
+  adicionarCorteRef,
+  removerCorteRef,
+  salvarCorte,
+  // mix
+  renderMixMeses,
+  selecionarMixMes,
+  abrirModalMix,
+  renderModalMixProdutos,
+  toggleMixProd,
+  confirmarSelecaoMix,
+  atualizarDataMix,
+  removerProdutoMix,
+  abrirCroqui,
+  onCroquiFile,
+  removerCroqui,
+  salvarCroqui,
+  salvarMix,
+  exportarCalendarioPDF,
 });
 
 init();
